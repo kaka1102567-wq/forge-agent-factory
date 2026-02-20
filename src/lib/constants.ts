@@ -26,6 +26,46 @@ export const TEMPLATE_TYPES = [
   "evaluation",
 ] as const;
 
+// Industries - Ngành nghề kinh doanh
+export const INDUSTRIES = [
+  "ecommerce",
+  "healthcare",
+  "education",
+  "fintech",
+  "real_estate",
+  "saas",
+  "retail",
+  "hospitality",
+  "logistics",
+  "media",
+  "legal",
+  "insurance",
+  "manufacturing",
+  "other",
+] as const;
+
+// Channels - Kênh triển khai agent
+export const CHANNELS = [
+  "website",
+  "zalo",
+  "messenger",
+  "telegram",
+  "email",
+  "phone",
+  "livechat",
+  "api",
+] as const;
+
+// Tones - Giọng điệu agent
+export const TONES = [
+  "formal",
+  "friendly",
+  "professional",
+  "casual",
+  "empathetic",
+  "authoritative",
+] as const;
+
 // Quality score thresholds - Ngưỡng chất lượng
 export const QUALITY_THRESHOLDS = {
   MIN_PASS: 70,

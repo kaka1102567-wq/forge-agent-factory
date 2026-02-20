@@ -4,10 +4,19 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-// Singleton pattern to prevent multiple Prisma instances in development
-// Note: Prisma v7 cần adapter hoặc accelerateUrl — sẽ configure đúng khi setup DB connection
-export const db =
-  globalForPrisma.prisma ??
-  new (PrismaClient as unknown as new () => PrismaClient)();
+// Prisma v7 requires adapter or accelerateUrl — lazy init để tránh crash lúc build
+// Runtime sẽ hoạt động khi có DATABASE_URL + adapter đúng
+function createPrismaClient(): PrismaClient {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return new (PrismaClient as any)() as PrismaClient;
+}
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = db;
+// Lazy singleton — chỉ tạo PrismaClient khi thực sự dùng
+export const db = new Proxy({} as PrismaClient, {
+  get(_target, prop) {
+    if (!globalForPrisma.prisma) {
+      globalForPrisma.prisma = createPrismaClient();
+    }
+    return Reflect.get(globalForPrisma.prisma, prop);
+  },
+});

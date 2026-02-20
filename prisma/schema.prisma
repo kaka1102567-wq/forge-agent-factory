@@ -1,0 +1,132 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// === Enums ===
+
+enum DomainStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum DocumentStatus {
+  DRAFT
+  REVIEW
+  APPROVED
+  PUBLISHED
+}
+
+enum AgentStatus {
+  DRAFT
+  TESTING
+  ACTIVE
+  DISABLED
+}
+
+// === Models ===
+
+model Domain {
+  id        String       @id @default(cuid())
+  name      String
+  industry  String
+  function  String       // Chức năng chính: sales, support, marketing...
+  channels  String[]     // Kênh triển khai: web, zalo, messenger...
+  tone      String       // Giọng điệu: formal, friendly, professional...
+  profile   Json         // Thông tin mở rộng về domain
+  status    DomainStatus @default(DRAFT)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  documents Document[]
+  agents    Agent[]
+
+  @@map("domains")
+}
+
+model Template {
+  id        String   @id @default(cuid())
+  name      String
+  category  String   // Phân loại: greeting, faq, objection-handling...
+  type      String   // Loại: system-prompt, response, workflow...
+  content   String   @db.Text
+  variables Json     // Các biến có thể thay thế trong template
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  documents Document[]
+
+  @@map("templates")
+}
+
+model Document {
+  id           String         @id @default(cuid())
+  domainId     String
+  templateId   String?
+  title        String
+  content      String         @db.Text
+  qualityScore Float?         // Điểm chất lượng từ AI scoring (0-100)
+  status       DocumentStatus @default(DRAFT)
+  version      Int            @default(1)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  domain   Domain    @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  template Template? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+
+  @@map("documents")
+}
+
+model Agent {
+  id           String      @id @default(cuid())
+  domainId     String
+  name         String
+  archetype    String      // Kiểu agent: sales, support, onboarding...
+  systemPrompt String      @db.Text
+  config       Json        // Cấu hình mở rộng: temperature, max_tokens...
+  status       AgentStatus @default(DRAFT)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  domain      Domain       @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  testCases   TestCase[]
+  testResults TestResult[]
+
+  @@map("agents")
+}
+
+model TestCase {
+  id             String   @id @default(cuid())
+  agentId        String
+  round          Int      // Vòng test: 1, 2, 3...
+  input          String   @db.Text
+  expectedOutput String   @db.Text
+  actualOutput   String?  @db.Text
+  score          Float?   // Điểm đánh giá (0-100)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  agent Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@map("test_cases")
+}
+
+model TestResult {
+  id        String   @id @default(cuid())
+  agentId   String
+  round     Int      // Vòng test tương ứng
+  score     Float    // Điểm tổng (0-100)
+  passed    Boolean
+  details   Json     // Chi tiết kết quả: metrics, failures...
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  agent Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@map("test_results")
+}

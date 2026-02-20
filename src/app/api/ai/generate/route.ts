@@ -1,18 +1,31 @@
 import { NextResponse } from "next/server";
-import { routeAI } from "@/lib/ai/router";
+import { routeTask } from "@/lib/ai/router";
+import {
+  DOC_GENERATE_PROMPT,
+  DocGenerateInputSchema,
+} from "@/lib/ai/prompts/doc-generate";
 
-// Sinh nội dung tài liệu/prompt - dùng Sonnet (cân bằng chất lượng/tốc độ)
+// Sinh nội dung tài liệu - dùng Sonnet (cân bằng chất lượng/tốc độ)
 export async function POST(request: Request) {
-  const { prompt, system, maxTokens } = await request.json();
+  try {
+    const body = await request.json();
+    const input = DocGenerateInputSchema.parse(body);
 
-  const response = await routeAI(prompt, {
-    tier: "balanced",
-    system,
-    maxTokens: maxTokens ?? 4096,
-  });
+    const { result, modelUsed, cost, latencyMs } = await routeTask(
+      DOC_GENERATE_PROMPT.task,
+      DOC_GENERATE_PROMPT.buildUserMessage(input),
+      {
+        system: DOC_GENERATE_PROMPT.system,
+        maxTokens: DOC_GENERATE_PROMPT.maxTokens,
+      }
+    );
 
-  const content = response.content[0];
-  const text = content.type === "text" ? content.text : "";
-
-  return NextResponse.json({ text, usage: response.usage });
+    return NextResponse.json({
+      document: JSON.parse(result),
+      meta: { modelUsed, cost, latencyMs },
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }

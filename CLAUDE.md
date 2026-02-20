@@ -20,6 +20,8 @@ Document-driven AI agent builder platform. Takes domain knowledge → generates 
 npm run dev        # Start dev server (Turbopack)
 npm run build      # Production build
 npm run lint       # ESLint
+npm test           # Vitest run
+npm run test:watch # Vitest watch mode
 npx prisma validate       # Validate schema
 npx prisma generate       # Generate Prisma client (output: src/generated/prisma)
 npx prisma migrate dev    # Create + apply migration
@@ -53,9 +55,15 @@ src/
 ├── lib/
 │   ├── db.ts              # Prisma singleton
 │   ├── ai/
-│   │   ├── client.ts      # Anthropic SDK singleton
-│   │   ├── router.ts      # Model tier routing (fast/balanced/powerful)
-│   │   └── prompts/       # Prompt templates
+│   │   ├── client.ts      # Anthropic SDK singleton + retry + error classification
+│   │   ├── router.ts      # TaskType-based routing + fallback chain
+│   │   ├── cost.ts        # Cost calculation + request logging
+│   │   ├── __tests__/     # Vitest unit tests
+│   │   └── prompts/       # Typed prompt templates (Zod schemas)
+│   │       ├── domain-classify.ts
+│   │       ├── doc-generate.ts
+│   │       ├── quality-score.ts
+│   │       └── agent-assemble.ts
 │   ├── constants.ts       # App-wide constants
 │   └── utils.ts           # cn() helper (shadcn)
 └── components/
@@ -80,10 +88,20 @@ Use `"use client"` only when needed (event handlers, hooks, browser APIs). Keep 
 All DB access via `src/lib/db.ts`. Import as `import { db } from "@/lib/db"`.
 
 ### AI Model Routing
-All AI calls go through `src/lib/ai/router.ts`:
-- **fast** (Haiku): classification, scoring, simple extraction
-- **balanced** (Sonnet): content generation, agent assembly
-- **powerful** (Opus): complex reasoning, quality review
+All AI calls go through `routeTask()` in `src/lib/ai/router.ts`:
+- **TaskType → ModelTier** routing (not manual tier selection):
+  - `classify`, `score`, `route`, `test_judge` → Haiku
+  - `generate`, `draft`, `analyze` → Sonnet
+  - `assemble`, `review` → Opus
+- **Fallback chain**: opus → sonnet → haiku (on 529/500 errors)
+- **Client** (`src/lib/ai/client.ts`): retry (3x exponential backoff), timeout (30s/60s Opus), error classification
+- **Cost tracking** (`src/lib/ai/cost.ts`): per-request cost calculation, daily totals
+- **Prompt registry** (`src/lib/ai/prompts/`): typed prompts with Zod input/output schemas
+  - `domain-classify.ts` — Haiku: phân loại industry/function/specialization
+  - `doc-generate.ts` — Sonnet: sinh tài liệu từ template + domain
+  - `quality-score.ts` — Haiku: chấm điểm 0-100
+  - `agent-assemble.ts` — Opus: lắp ráp system prompt từ docs
+- Usage: `import { routeTask } from "@/lib/ai/router"` → `routeTask("classify", input, { system, maxTokens })`
 
 ### Validation
 Zod for all API input validation. Validate at route handler level before DB operations.
@@ -100,5 +118,9 @@ Zod for all API input validation. Validate at route handler level before DB oper
 - shadcn components live in `src/components/ui/` (don't edit manually)
 - Use `sonner` for toast notifications (not deprecated `toast`)
 
+## Known Issues
+- Prisma v7 PrismaClient cần adapter/accelerateUrl — `db.ts` dùng type assertion tạm, cần setup Prisma adapter đúng
+- ESLint config `core-web-vitals` import path cần fix cho eslint-config-next mới
+
 ## Current Sprint
-Phase 0 - Week 1: Project Setup
+Phase 0 - Week 1: Project Setup + AI Router

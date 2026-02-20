@@ -1,32 +1,31 @@
 import { NextResponse } from "next/server";
-import { routeAI } from "@/lib/ai/router";
+import { routeTask } from "@/lib/ai/router";
+import {
+  AGENT_ASSEMBLE_PROMPT,
+  AgentAssembleInputSchema,
+} from "@/lib/ai/prompts/agent-assemble";
 
-// Lắp ráp agent hoàn chỉnh - dùng Sonnet (cần reasoning tốt)
+// Lắp ráp agent - dùng Opus (cần reasoning mạnh)
 export async function POST(request: Request) {
-  const { domain, documents, archetype } = await request.json();
+  try {
+    const body = await request.json();
+    const input = AgentAssembleInputSchema.parse(body);
 
-  const system = `You are an expert AI agent architect. Build a complete agent system prompt and configuration based on the provided domain knowledge and documents.`;
+    const { result, modelUsed, cost, latencyMs } = await routeTask(
+      AGENT_ASSEMBLE_PROMPT.task,
+      AGENT_ASSEMBLE_PROMPT.buildUserMessage(input),
+      {
+        system: AGENT_ASSEMBLE_PROMPT.system,
+        maxTokens: AGENT_ASSEMBLE_PROMPT.maxTokens,
+      }
+    );
 
-  const prompt = `Domain: ${JSON.stringify(domain)}
-Archetype: ${archetype}
-Documents: ${JSON.stringify(documents)}
-
-Create a complete agent configuration with:
-1. System prompt
-2. Greeting message
-3. Key behaviors
-4. Escalation rules
-
-Respond with JSON.`;
-
-  const response = await routeAI(prompt, {
-    tier: "balanced",
-    system,
-    maxTokens: 8192,
-  });
-
-  const content = response.content[0];
-  const text = content.type === "text" ? content.text : "{}";
-
-  return NextResponse.json(JSON.parse(text));
+    return NextResponse.json({
+      agent: JSON.parse(result),
+      meta: { modelUsed, cost, latencyMs },
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }

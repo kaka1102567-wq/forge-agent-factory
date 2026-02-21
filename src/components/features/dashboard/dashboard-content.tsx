@@ -9,6 +9,7 @@ import {
   AlertTriangle,
   Star,
   Clock,
+  Zap,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -76,6 +77,7 @@ const ACTIVITY_ICONS: Record<string, string> = {
   agent_assemble: "🔧",
   doc_generate: "📝",
   health_check: "💓",
+  quick_build: "⚡",
 };
 
 function formatCost(cost: number): string {
@@ -196,6 +198,23 @@ export function DashboardContent({ stats, agents, activities }: DashboardContent
           </CardContent>
         </Card>
       </div>
+
+      {/* === Quick Mode CTA === */}
+      <a href="/quick">
+        <Card className="cursor-pointer border-primary/20 bg-primary/5 transition-colors hover:bg-primary/10">
+          <CardContent className="flex items-center gap-4 py-4">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+              <Zap className="h-5 w-5 text-primary" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <h3 className="font-semibold">Quick Mode</h3>
+              <p className="text-sm text-muted-foreground">
+                Tạo agent trong vài phút — chỉ cần mô tả doanh nghiệp.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </a>
 
       {/* === Agent Cards Grid === */}
       <div>

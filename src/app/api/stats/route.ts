@@ -4,10 +4,11 @@ import { db } from "@/lib/db";
 // GET /api/stats — Aggregate stats cho dashboard
 export async function GET() {
   try {
-    // Tổng agents + deployed count
-    const [totalAgents, deployedAgents] = await Promise.all([
+    // Tổng agents + deployed count + quick mode count
+    const [totalAgents, deployedAgents, quickModeAgents] = await Promise.all([
       db.agent.count(),
       db.agent.count({ where: { status: "DEPLOYED" } }),
+      db.agent.count({ where: { quickMode: true } }),
     ]);
 
     // Avg quality score từ documents có score
@@ -46,6 +47,7 @@ export async function GET() {
     return NextResponse.json({
       totalAgents,
       deployedAgents,
+      quickModeAgents,
       avgQualityScore: Math.round((qualityAgg._avg.qualityScore ?? 0) * 100) / 100,
       monthlyCost: thisMonthCost._sum.cost ?? 0,
       lastMonthCost: lastMonthCost._sum.cost ?? 0,

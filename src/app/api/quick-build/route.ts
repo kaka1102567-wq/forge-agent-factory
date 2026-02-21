@@ -496,6 +496,10 @@ export async function POST(request: Request) {
     };
 
     try {
+      logActivity("quick_build", "Quick Build bắt đầu", {
+        metadata: { businessDescription: ctx.businessDescription, channels: ctx.channels },
+      });
+
       // Step 1: Classify
       const classification = await stepClassify(ctx);
 

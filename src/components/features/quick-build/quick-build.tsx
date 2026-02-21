@@ -186,6 +186,12 @@ export function QuickBuild() {
                   break;
 
                 case "error":
+                  // Đánh dấu step đang running → error
+                  setSteps((prev) =>
+                    prev.map((s) =>
+                      s.status === "running" ? { ...s, status: "error" } : s
+                    )
+                  );
                   toast.error(payload.message ?? "Pipeline error");
                   setPhase("describe");
                   break;

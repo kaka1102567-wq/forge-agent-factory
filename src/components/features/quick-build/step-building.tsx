@@ -1,6 +1,7 @@
 "use client";
 
-import { Check, Loader2, Circle, ShieldAlert } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Check, Loader2, Circle, ShieldAlert, Clock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -61,6 +62,24 @@ function StepIcon({ status }: { status: PipelineStep["status"] }) {
   }
 }
 
+// Ước tính thời gian còn lại dựa trên elapsed + percent
+function useEstimatedTime(percent: number) {
+  const startRef = useRef(Date.now());
+  const [elapsed, setElapsed] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => setElapsed(Date.now() - startRef.current), 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  if (percent <= 2 || elapsed < 3000) return null; // Cần ít nhất 3s và 2% để ước tính
+  const totalEstimated = (elapsed / percent) * 100;
+  const remaining = Math.max(0, Math.round((totalEstimated - elapsed) / 1000));
+  if (remaining < 5) return "< 5 giây";
+  if (remaining < 60) return `~${remaining} giây`;
+  return `~${Math.ceil(remaining / 60)} phút`;
+}
+
 // === Component ===
 
 export function StepBuilding({
@@ -71,13 +90,23 @@ export function StepBuilding({
   roundResults,
   safetyBlocked,
 }: StepBuildingProps) {
+  const estimatedTime = useEstimatedTime(percent);
+
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       {/* Progress bar */}
       <div className="space-y-2">
         <div className="flex items-center justify-between text-sm">
           <span className="font-medium">Đang build agent...</span>
-          <span className="text-muted-foreground">{percent}%</span>
+          <div className="flex items-center gap-3">
+            {estimatedTime && (
+              <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Clock className="h-3 w-3" />
+                {estimatedTime}
+              </span>
+            )}
+            <span className="text-muted-foreground">{percent}%</span>
+          </div>
         </div>
         <div className="h-2 overflow-hidden rounded-full bg-muted">
           <div

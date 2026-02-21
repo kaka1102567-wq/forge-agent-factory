@@ -502,6 +502,9 @@ export async function POST(request: Request) {
 
       // Step 1: Classify
       const classification = await stepClassify(ctx);
+      logActivity("quick_build", "Quick Build — phân loại domain xong", {
+        metadata: { industry: classification.industry, function: classification.function },
+      });
 
       // Step 2: Create Domain
       const domain = await stepCreateDomain(ctx, classification);
@@ -512,9 +515,17 @@ export async function POST(request: Request) {
 
       // Step 3: Generate Docs
       const { parsed: docsParsed } = await stepGenerateDocs(ctx, domainWithChannels);
+      logActivity("quick_build", "Quick Build — sinh 3 tài liệu xong", {
+        metadata: { documentCount: docsParsed.length },
+      });
 
       // Step 4: Assemble Agent
       const { agent, config } = await stepAssembleAgent(ctx, domainWithChannels, docsParsed);
+
+      logActivity("quick_build", "Quick Build — lắp ráp agent xong", {
+        agentId: agent.id,
+        metadata: { agentName: agent.name },
+      });
 
       // Step 5: Generate Test Cases
       const documentSummaries = docsParsed.map((d) => `${d.title} (${d.category})`);
@@ -541,13 +552,21 @@ export async function POST(request: Request) {
       };
       const testResults = await stepRunTests(ctx, agentData, domainCtx, r1Cases, r4Cases);
 
+      logActivity("quick_build", "Quick Build — test hoàn tất", {
+        agentId: agent.id,
+        metadata: {
+          round1Passed: testResults.round1Passed,
+          round4Passed: testResults.round4Passed,
+        },
+      });
+
       // Step 7: Finalize
       const deployReady = testResults.round1Passed && testResults.round4Passed;
       await stepFinalize(ctx, agent.id, deployReady);
 
       // Final complete event
       sseEvent(writer, "complete", {
-        agent: { id: agent.id, name: agent.name },
+        agent: { id: agent.id, name: agent.name, systemPrompt: agent.systemPrompt },
         domain: { id: domain.id, name: domain.name },
         documentCount: docsParsed.length,
         testResults: {

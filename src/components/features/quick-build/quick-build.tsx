@@ -16,7 +16,7 @@ import { StepReview } from "./step-review";
 type Phase = "describe" | "building" | "review" | "blocked";
 
 interface CompleteData {
-  agent: { id: string; name: string };
+  agent: { id: string; name: string; systemPrompt: string };
   domain: { id: string; name: string };
   documentCount: number;
   testResults: {

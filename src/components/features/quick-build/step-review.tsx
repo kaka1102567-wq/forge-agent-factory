@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Rocket,
   ArrowRight,
@@ -10,6 +10,8 @@ import {
   Bot,
   Send,
   Globe,
+  MessageCircle,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,7 +29,7 @@ import { toast } from "sonner";
 // === Types ===
 
 interface CompleteData {
-  agent: { id: string; name: string };
+  agent: { id: string; name: string; systemPrompt: string };
   domain: { id: string; name: string };
   documentCount: number;
   testResults: {
@@ -42,6 +44,13 @@ interface StepReviewProps {
   data: CompleteData;
 }
 
+interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
+const QUICK_TEST_LIMIT = 5;
+
 // === Component ===
 
 export function StepReview({ data }: StepReviewProps) {
@@ -50,6 +59,47 @@ export function StepReview({ data }: StepReviewProps) {
   const [deployChannel, setDeployChannel] = useState<"TELEGRAM" | "WEB" | null>(null);
   const [botToken, setBotToken] = useState("");
   const [deploying, setDeploying] = useState(false);
+
+  // Quick test chat state
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatInput, setChatInput] = useState("");
+  const [chatLoading, setChatLoading] = useState(false);
+  const chatScrollRef = useRef<HTMLDivElement>(null);
+  const userMsgCount = chatMessages.filter((m) => m.role === "user").length;
+
+  useEffect(() => {
+    chatScrollRef.current?.scrollTo({ top: chatScrollRef.current.scrollHeight, behavior: "smooth" });
+  }, [chatMessages]);
+
+  const sendChat = async () => {
+    if (!chatInput.trim() || chatLoading || userMsgCount >= QUICK_TEST_LIMIT) return;
+
+    const userMsg: ChatMessage = { role: "user", content: chatInput.trim() };
+    const updated = [...chatMessages, userMsg];
+    setChatMessages(updated);
+    setChatInput("");
+    setChatLoading(true);
+
+    try {
+      const res = await fetch("/api/ai/chat-preview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          systemPrompt: data.agent.systemPrompt,
+          messages: updated.map(({ role, content }) => ({ role, content })),
+          config: { model: "sonnet", temperature: 0.7, maxTokens: 2048 },
+        }),
+      });
+
+      if (!res.ok) throw new Error("Chat failed");
+      const result = await res.json();
+      setChatMessages([...updated, { role: "assistant", content: result.message }]);
+    } catch {
+      setChatMessages([...updated, { role: "assistant", content: "Lỗi kết nối. Thử lại." }]);
+    } finally {
+      setChatLoading(false);
+    }
+  };
 
   const handleDeploy = async () => {
     if (!deployChannel) return;
@@ -147,6 +197,78 @@ export function StepReview({ data }: StepReviewProps) {
                 </div>
               </div>
             ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Quick test chat */}
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <MessageCircle className="h-4 w-4" />
+              Thử nghiệm nhanh
+            </CardTitle>
+            <span className="text-xs text-muted-foreground">
+              {userMsgCount}/{QUICK_TEST_LIMIT} tin nhắn
+            </span>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div
+            ref={chatScrollRef}
+            className="space-y-2 overflow-y-auto rounded-md border p-3"
+            style={{ minHeight: 120, maxHeight: 280 }}
+          >
+            {chatMessages.length === 0 && (
+              <p className="py-4 text-center text-xs text-muted-foreground">
+                Gửi tin nhắn để thử agent trước khi deploy.
+              </p>
+            )}
+            {chatMessages.map((msg, i) => (
+              <div
+                key={i}
+                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+              >
+                <div
+                  className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${
+                    msg.role === "user"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted"
+                  }`}
+                >
+                  <p className="whitespace-pre-wrap">{msg.content}</p>
+                </div>
+              </div>
+            ))}
+            {chatLoading && (
+              <div className="flex justify-start">
+                <div className="rounded-lg bg-muted px-3 py-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <Input
+              value={chatInput}
+              onChange={(e) => setChatInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendChat()}
+              placeholder={
+                userMsgCount >= QUICK_TEST_LIMIT
+                  ? "Đã hết lượt thử nghiệm"
+                  : "Nhập tin nhắn thử..."
+              }
+              disabled={chatLoading || userMsgCount >= QUICK_TEST_LIMIT}
+              className="text-sm"
+            />
+            <Button
+              size="sm"
+              onClick={sendChat}
+              disabled={chatLoading || !chatInput.trim() || userMsgCount >= QUICK_TEST_LIMIT}
+            >
+              <Send className="h-4 w-4" />
+            </Button>
           </div>
         </CardContent>
       </Card>

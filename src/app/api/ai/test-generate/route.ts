@@ -84,9 +84,15 @@ export async function POST(request: Request) {
         maxTokens: TEST_GENERATE_PROMPT.maxTokens,
       });
 
-      const parsed = TestGenerateOutputSchema.parse(
-        JSON.parse(stripMarkdownJson(result))
-      );
+      // Robust JSON parse — fallback extract JSON object từ text
+      let jsonText = stripMarkdownJson(result);
+      try {
+        JSON.parse(jsonText);
+      } catch {
+        const match = result.match(/\{[\s\S]*"testCases"[\s\S]*\}/);
+        if (match) jsonText = match[0];
+      }
+      const parsed = TestGenerateOutputSchema.parse(JSON.parse(jsonText));
 
       // Giới hạn theo count config
       const maxCount = TEST_ROUNDS[roundNum].count;
@@ -130,7 +136,9 @@ export async function POST(request: Request) {
       );
     }
     const message = error instanceof Error ? error.message : "Unknown error";
-    console.error("[test-generate]", error);
+    if (process.env.NODE_ENV === "development") {
+      console.error("[test-generate]", error);
+    }
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

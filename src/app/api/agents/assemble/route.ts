@@ -63,8 +63,15 @@ export async function POST(request: Request) {
       maxTokens: AGENT_ASSEMBLE_PROMPT.maxTokens,
     });
 
-    // Parse JSON response từ AI
-    const parsed = JSON.parse(stripMarkdownJson(result.result));
+    // Robust JSON parse — fallback extract JSON object từ text
+    let jsonText = stripMarkdownJson(result.result);
+    try {
+      JSON.parse(jsonText);
+    } catch {
+      const match = result.result.match(/\{[\s\S]*"systemPrompt"[\s\S]*\}/);
+      if (match) jsonText = match[0];
+    }
+    const parsed = JSON.parse(jsonText);
 
     return NextResponse.json({
       agent: {

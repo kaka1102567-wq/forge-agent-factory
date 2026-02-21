@@ -167,4 +167,4 @@ export async function routeTask(
   }
 }
 
-export { TASK_ROUTING, FALLBACK_CHAIN };
+export { TASK_ROUTING, FALLBACK_CHAIN, TIER_TIMEOUT };

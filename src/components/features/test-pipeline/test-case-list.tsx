@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { ChevronDown, ChevronRight } from "lucide-react";
 
@@ -46,9 +46,8 @@ export function TestCaseList({ cases }: TestCaseListProps) {
         </thead>
         <tbody>
           {cases.map((tc) => (
-            <>
+            <Fragment key={tc.id}>
               <tr
-                key={tc.id}
                 className="cursor-pointer border-b transition-colors hover:bg-muted/30"
                 onClick={() =>
                   setExpandedId(expandedId === tc.id ? null : tc.id)
@@ -105,7 +104,7 @@ export function TestCaseList({ cases }: TestCaseListProps) {
                 </td>
               </tr>
               {expandedId === tc.id && (
-                <tr key={`${tc.id}-detail`} className="border-b bg-muted/10">
+                <tr className="border-b bg-muted/10">
                   <td colSpan={5} className="px-6 py-3">
                     <div className="space-y-2 text-sm">
                       <div>
@@ -136,7 +135,7 @@ export function TestCaseList({ cases }: TestCaseListProps) {
                   </td>
                 </tr>
               )}
-            </>
+            </Fragment>
           ))}
         </tbody>
       </table>

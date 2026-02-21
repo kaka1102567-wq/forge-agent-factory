@@ -80,9 +80,10 @@ describe("Router - Routing Rules", () => {
   });
 
   it("uses correct model IDs", () => {
-    expect(MODEL_MAP.haiku).toBe("claude-haiku-4-5-20251001");
-    expect(MODEL_MAP.sonnet).toBe("claude-sonnet-4-6-20250514");
-    expect(MODEL_MAP.opus).toBe("claude-opus-4-6-20250514");
+    // Claudible proxy format (OpenAI-compatible)
+    expect(MODEL_MAP.haiku).toBe("claude-haiku-4.5");
+    expect(MODEL_MAP.sonnet).toBe("claude-sonnet-4.6");
+    expect(MODEL_MAP.opus).toBe("claude-opus-4.6");
   });
 });
 

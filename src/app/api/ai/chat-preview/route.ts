@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { ChatPreviewRequestSchema } from "@/lib/schemas/agent-config";
 import { sendMessage, classifyError } from "@/lib/ai/client";
-import { MODEL_MAP, type ModelTier } from "@/lib/ai/router";
+import { MODEL_MAP, TIER_TIMEOUT, type ModelTier } from "@/lib/ai/router";
 import { calculateCost, logRequest } from "@/lib/ai/cost";
 
 export async function POST(request: Request) {
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
         system: data.systemPrompt,
         messages: data.messages,
       },
-      { timeoutMs: tier === "opus" ? 60_000 : 30_000 }
+      { timeoutMs: TIER_TIMEOUT[tier] }
     );
 
     const latencyMs = Math.round(performance.now() - startTime);

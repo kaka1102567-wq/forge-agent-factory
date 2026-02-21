@@ -33,7 +33,7 @@ export function AgentConfigPanel({
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="text-base">Cau hinh</CardTitle>
+        <CardTitle className="text-base">Cấu hình</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 pt-0">
         {/* Model */}
@@ -48,9 +48,9 @@ export function AgentConfigPanel({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="haiku">Haiku (nhanh, re)</SelectItem>
-              <SelectItem value="sonnet">Sonnet (can bang)</SelectItem>
-              <SelectItem value="opus">Opus (manh nhat)</SelectItem>
+              <SelectItem value="haiku">Haiku (nhanh, rẻ)</SelectItem>
+              <SelectItem value="sonnet">Sonnet (cân bằng)</SelectItem>
+              <SelectItem value="opus">Opus (mạnh nhất)</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -87,7 +87,7 @@ export function AgentConfigPanel({
 
         {/* Channels */}
         <div className="space-y-1">
-          <Label className="text-xs">Kenh trien khai</Label>
+          <Label className="text-xs">Kênh triển khai</Label>
           <div className="flex flex-wrap gap-2">
             {domainChannels.map((ch) => {
               const active = config.channels.includes(ch);
@@ -117,7 +117,7 @@ export function AgentConfigPanel({
 
         {/* Guardrails: Blocked Topics */}
         <div className="space-y-1">
-          <Label className="text-xs">Chu de bi chan (moi dong 1 chu de)</Label>
+          <Label className="text-xs">Chủ đề bị chặn (mỗi dòng 1 chủ đề)</Label>
           <Textarea
             value={config.guardrails.blockedTopics.join("\n")}
             onChange={(e) => {
@@ -131,7 +131,7 @@ export function AgentConfigPanel({
             disabled={disabled}
             rows={3}
             className="text-xs"
-            placeholder="VD: chinh tri, ton giao..."
+            placeholder="VD: chính trị, tôn giáo..."
           />
         </div>
 
@@ -151,13 +151,13 @@ export function AgentConfigPanel({
             disabled={disabled}
             rows={3}
             className="text-xs"
-            placeholder="VD: yeu cau hoan tien, khieu nai..."
+            placeholder="VD: yêu cầu hoàn tiền, khiếu nại..."
           />
         </div>
 
         {/* Max Response Length */}
         <div className="space-y-1">
-          <Label className="text-xs">Do dai toi da response (ky tu)</Label>
+          <Label className="text-xs">Độ dài tối đa response (ký tự)</Label>
           <Input
             type="number"
             min={100}
@@ -175,7 +175,7 @@ export function AgentConfigPanel({
             }}
             disabled={disabled}
             className="h-8 text-xs"
-            placeholder="De trong = khong gioi han"
+            placeholder="Để trống = không giới hạn"
           />
         </div>
       </CardContent>

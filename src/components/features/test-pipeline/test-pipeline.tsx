@@ -116,12 +116,12 @@ export function TestPipeline({
         }
 
         toast.success(
-          `Da tao test cases cho vong ${round}`
+          `Đã tạo test cases cho vòng ${round}`
         );
         await refreshData();
       } catch (err) {
         toast.error(
-          err instanceof Error ? err.message : "Loi tao test cases"
+          err instanceof Error ? err.message : "Lỗi tạo test cases"
         );
       } finally {
         setGeneratingRounds((prev) => {
@@ -146,17 +146,17 @@ export function TestPipeline({
 
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err.error ?? "Loi tao test cases");
+        throw new Error(err.error ?? "Lỗi tạo test cases");
       }
 
       const data = await res.json();
       toast.success(
-        `Da tao ${data.count} test cases cho ${data.rounds} vong`
+        `Đã tạo ${data.count} test cases cho ${data.rounds} vòng`
       );
       await refreshData();
     } catch (err) {
       toast.error(
-        err instanceof Error ? err.message : "Loi tao test cases"
+        err instanceof Error ? err.message : "Lỗi tạo test cases"
       );
     } finally {
       setPhase("idle");
@@ -182,7 +182,7 @@ export function TestPipeline({
 
         if (!res.ok) {
           const err = await res.json();
-          throw new Error(err.error ?? "Loi chay test");
+          throw new Error(err.error ?? "Lỗi chạy test");
         }
 
         // SSE consume
@@ -216,7 +216,7 @@ export function TestPipeline({
       } catch (err) {
         if (err instanceof DOMException && err.name === "AbortError") return;
         toast.error(
-          err instanceof Error ? err.message : "Loi chay test"
+          err instanceof Error ? err.message : "Lỗi chạy test"
         );
       } finally {
         setRunningRound(null);
@@ -244,7 +244,7 @@ export function TestPipeline({
 
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err.error ?? "Loi chay test");
+        throw new Error(err.error ?? "Lỗi chạy test");
       }
 
       const reader = res.body?.getReader();
@@ -277,7 +277,7 @@ export function TestPipeline({
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") return;
       toast.error(
-        err instanceof Error ? err.message : "Loi chay test"
+        err instanceof Error ? err.message : "Lỗi chạy test"
       );
     } finally {
       setPhase("idle");
@@ -328,7 +328,7 @@ export function TestPipeline({
       // round_complete event
       if (data.passRate !== undefined) {
         toast.info(
-          `Vong ${data.round}: ${data.passed ? "PASSED" : "FAILED"} (${(data.score as number)?.toFixed(1)} diem)`
+          `Vòng ${data.round}: ${data.passed ? "PASSED" : "FAILED"} (${(data.score as number)?.toFixed(1)} điểm)`
         );
       }
     }
@@ -373,7 +373,7 @@ export function TestPipeline({
           onClick={handleGenerateAll}
           disabled={isGenerating || isRunning}
         >
-          {isGenerating ? "Dang tao..." : "Tao tat ca test cases"}
+          {isGenerating ? "Đang tạo..." : "Tạo tất cả test cases"}
         </Button>
         {hasCases && (
           <Button
@@ -381,7 +381,7 @@ export function TestPipeline({
             onClick={handleRunAll}
             disabled={isGenerating || isRunning}
           >
-            {isRunning ? "Dang chay..." : "Chay tat ca (V1-V5)"}
+            {isRunning ? "Đang chạy..." : "Chạy tất cả (V1-V5)"}
           </Button>
         )}
       </div>

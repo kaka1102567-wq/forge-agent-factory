@@ -98,7 +98,7 @@ export function PreviewChat({
         ...newMessages,
         {
           role: "assistant",
-          content: "Loi: Khong the gui tin nhan. Vui long thu lai.",
+          content: "Lỗi: Không thể gửi tin nhắn. Vui lòng thử lại.",
         },
       ]);
     } finally {
@@ -111,10 +111,10 @@ export function PreviewChat({
       <DialogContent className="flex max-h-[80vh] max-w-lg flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
-            <span>Thu nghiem Agent</span>
+            <span>Thử nghiệm Agent</span>
             <div className="flex items-center gap-2 text-xs font-normal text-muted-foreground">
               <span>
-                {userMessageCount}/{CHAT_PREVIEW_MAX_MESSAGES} tin nhan
+                {userMessageCount}/{CHAT_PREVIEW_MAX_MESSAGES} tin nhắn
               </span>
               <Badge variant="secondary" className="text-xs">
                 ${totalCost.toFixed(4)}
@@ -131,7 +131,7 @@ export function PreviewChat({
         >
           {messages.length === 0 && (
             <p className="py-8 text-center text-sm text-muted-foreground">
-              Gui tin nhan de thu nghiem agent.
+              Gửi tin nhắn để thử nghiệm agent.
             </p>
           )}
           {messages.map((msg, i) => (
@@ -171,7 +171,7 @@ export function PreviewChat({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendChatMessage()}
-            placeholder={limitReached ? "Da het luot thu nghiem" : "Nhap tin nhan..."}
+            placeholder={limitReached ? "Đã hết lượt thử nghiệm" : "Nhập tin nhắn..."}
             disabled={loading || limitReached}
             className="text-sm"
           />
@@ -187,10 +187,10 @@ export function PreviewChat({
         {/* Actions */}
         <div className="flex items-center justify-end gap-2 border-t pt-3">
           <Button variant="outline" size="sm" onClick={onReject}>
-            Can chinh lai
+            Cần chỉnh lại
           </Button>
           <Button size="sm" onClick={onAccept}>
-            Chap nhan!
+            Chấp nhận!
           </Button>
         </div>
       </DialogContent>

@@ -81,7 +81,7 @@ export function SystemPromptPreview({
           {sections.map((section, i) => (
             <details key={i} open={i === 0}>
               <summary className="cursor-pointer text-sm font-semibold hover:text-primary">
-                {section.title || "Tong quan"}
+                {section.title || "Tổng quan"}
               </summary>
               <pre className="mt-1 whitespace-pre-wrap text-xs text-muted-foreground">
                 {section.content}
@@ -93,7 +93,7 @@ export function SystemPromptPreview({
         {/* Capabilities */}
         {capabilities.length > 0 && (
           <div>
-            <p className="mb-1 text-xs font-medium">Kha nang</p>
+            <p className="mb-1 text-xs font-medium">Khả năng</p>
             <div className="flex flex-wrap gap-1">
               {capabilities.map((cap, i) => (
                 <Badge key={i} variant="default" className="text-xs">
@@ -107,7 +107,7 @@ export function SystemPromptPreview({
         {/* Limitations */}
         {limitations.length > 0 && (
           <div>
-            <p className="mb-1 text-xs font-medium">Gioi han</p>
+            <p className="mb-1 text-xs font-medium">Giới hạn</p>
             <div className="flex flex-wrap gap-1">
               {limitations.map((lim, i) => (
                 <Badge key={i} variant="destructive" className="text-xs">
@@ -122,15 +122,15 @@ export function SystemPromptPreview({
         <div className="flex items-center gap-2 pt-2">
           <Button variant="outline" size="sm" onClick={onBack}>
             <ArrowLeft className="mr-1 h-3 w-3" />
-            Quay lai
+            Quay lại
           </Button>
           <Button variant="outline" size="sm" onClick={onTestPreview}>
             <MessageSquare className="mr-1 h-3 w-3" />
-            Thu nghiem
+            Thử nghiệm
           </Button>
           <Button size="sm" onClick={onSaveAgent} disabled={saving}>
             <Save className="mr-1 h-3 w-3" />
-            {saving ? "Dang luu..." : "Luu Agent"}
+            {saving ? "Đang lưu..." : "Lưu Agent"}
           </Button>
         </div>
       </CardContent>

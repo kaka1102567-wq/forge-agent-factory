@@ -34,11 +34,11 @@ export function OverallProgress({
       <div className="flex-1">
         <div className="mb-1 flex items-center justify-between">
           <span className="text-sm font-medium">
-            {passedCount}/6 vong passed
+            {passedCount}/6 vòng passed
           </span>
           {allPassed && (
             <span className="text-sm font-medium text-emerald-600">
-              San sang deploy
+              Sẵn sàng deploy
             </span>
           )}
         </div>

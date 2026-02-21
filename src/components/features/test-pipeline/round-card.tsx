@@ -63,8 +63,8 @@ const STATUS_BADGE: Record<
 > = {
   passed: { label: "Passed", variant: "default" },
   failed: { label: "Failed", variant: "secondary" },
-  running: { label: "Dang chay...", variant: "outline" },
-  pending: { label: "Cho", variant: "outline" },
+  running: { label: "Đang chạy...", variant: "outline" },
+  pending: { label: "Chờ", variant: "outline" },
 };
 
 export function RoundCard({
@@ -137,7 +137,7 @@ export function RoundCard({
               onClick={onGenerate}
               disabled={isGenerating || isRunning}
             >
-              {isGenerating ? "Dang tao..." : "Tao cases"}
+              {isGenerating ? "Đang tạo..." : "Tạo cases"}
             </Button>
           ) : (
             <Button
@@ -145,7 +145,7 @@ export function RoundCard({
               onClick={onRun}
               disabled={isRunning || isGenerating}
             >
-              {isRunning ? "Dang chay..." : "Chay"}
+              {isRunning ? "Đang chạy..." : "Chạy"}
             </Button>
           )}
         </div>

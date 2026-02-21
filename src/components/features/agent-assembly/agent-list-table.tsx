@@ -28,9 +28,9 @@ export function AgentListTable({ agents }: AgentListTableProps) {
   if (agents.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-12 text-center">
-        <p className="text-muted-foreground">Chua co agent nao.</p>
+        <p className="text-muted-foreground">Chưa có agent nào.</p>
         <p className="text-sm text-muted-foreground">
-          Chon domain va lap rap agent dau tien.
+          Chọn domain và lắp ráp agent đầu tiên.
         </p>
       </div>
     );
@@ -41,12 +41,12 @@ export function AgentListTable({ agents }: AgentListTableProps) {
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b bg-muted/50">
-            <th className="px-4 py-3 text-left font-medium">Ten</th>
+            <th className="px-4 py-3 text-left font-medium">Tên</th>
             <th className="px-4 py-3 text-left font-medium">Archetype</th>
             <th className="px-4 py-3 text-left font-medium">Domain</th>
-            <th className="px-4 py-3 text-left font-medium">Trang thai</th>
+            <th className="px-4 py-3 text-left font-medium">Trạng thái</th>
             <th className="hidden px-4 py-3 text-left font-medium sm:table-cell">
-              Ngay tao
+              Ngày tạo
             </th>
           </tr>
         </thead>

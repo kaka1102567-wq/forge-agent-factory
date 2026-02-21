@@ -25,7 +25,7 @@ export function TestCaseList({ cases }: TestCaseListProps) {
   if (cases.length === 0) {
     return (
       <p className="py-4 text-center text-sm text-muted-foreground">
-        Chua co test case.
+        Chưa có test case.
       </p>
     );
   }
@@ -40,8 +40,8 @@ export function TestCaseList({ cases }: TestCaseListProps) {
             <th className="hidden px-3 py-2 text-left font-medium md:table-cell">
               Category
             </th>
-            <th className="px-3 py-2 text-center font-medium">Diem</th>
-            <th className="px-3 py-2 text-center font-medium">Ket qua</th>
+            <th className="px-3 py-2 text-center font-medium">Điểm</th>
+            <th className="px-3 py-2 text-center font-medium">Kết quả</th>
           </tr>
         </thead>
         <tbody>
@@ -98,7 +98,7 @@ export function TestCaseList({ cases }: TestCaseListProps) {
                   )}
                   {tc.passed === null && (
                     <Badge variant="outline" className="text-xs">
-                      Cho
+                      Chờ
                     </Badge>
                   )}
                 </td>
@@ -108,14 +108,14 @@ export function TestCaseList({ cases }: TestCaseListProps) {
                   <td colSpan={5} className="px-6 py-3">
                     <div className="space-y-2 text-sm">
                       <div>
-                        <span className="font-medium">Mong doi:</span>{" "}
+                        <span className="font-medium">Mong đợi:</span>{" "}
                         <span className="text-muted-foreground">
                           {tc.expectedOutput}
                         </span>
                       </div>
                       {tc.actualOutput && (
                         <div>
-                          <span className="font-medium">Thuc te:</span>{" "}
+                          <span className="font-medium">Thực tế:</span>{" "}
                           <span className="text-muted-foreground">
                             {tc.actualOutput.length > 500
                               ? tc.actualOutput.slice(0, 500) + "..."
@@ -125,7 +125,7 @@ export function TestCaseList({ cases }: TestCaseListProps) {
                       )}
                       {tc.reasoning && (
                         <div>
-                          <span className="font-medium">Ly do:</span>{" "}
+                          <span className="font-medium">Lý do:</span>{" "}
                           <span className="text-muted-foreground">
                             {tc.reasoning}
                           </span>

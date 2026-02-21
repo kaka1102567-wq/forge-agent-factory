@@ -1,3 +1,4 @@
+import { z } from "zod/v4";
 import { db } from "@/lib/db";
 import {
   executeTestCase,
@@ -6,6 +7,10 @@ import {
   type TestCaseData,
 } from "@/lib/ai/test-runner";
 import { TEST_ROUNDS, type RoundNumber } from "@/lib/constants";
+
+const RunRequestSchema = z.object({
+  round: z.number().min(1).max(6).optional(),
+});
 
 // SSE stream để chạy test cases real-time
 export async function POST(
@@ -17,9 +22,10 @@ export async function POST(
   let round: number | undefined;
   try {
     const body = await request.json();
-    round = body.round;
+    const parsed = RunRequestSchema.parse(body);
+    round = parsed.round;
   } catch {
-    // body rỗng = run all rounds 1-5
+    // body rỗng hoặc không có round = run all rounds 1-5
   }
 
   // Fetch agent + domain

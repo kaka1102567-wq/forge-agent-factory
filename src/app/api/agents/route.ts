@@ -1,19 +1,36 @@
 import { NextResponse } from "next/server";
+import { z } from "zod/v4";
 import { db } from "@/lib/db";
 import { CreateAgentSchema } from "@/lib/schemas/agent-config";
 
 export async function GET() {
-  const agents = await db.agent.findMany({
-    orderBy: { createdAt: "desc" },
-    include: { domain: true },
-  });
-  return NextResponse.json(agents);
+  try {
+    const agents = await db.agent.findMany({
+      orderBy: { createdAt: "desc" },
+      include: { domain: true },
+    });
+    return NextResponse.json(agents);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Database error";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const data = CreateAgentSchema.parse(body);
+
+    // Kiểm tra domain tồn tại
+    const domain = await db.domain.findUnique({
+      where: { id: data.domainId },
+    });
+    if (!domain) {
+      return NextResponse.json(
+        { error: "Domain không tồn tại" },
+        { status: 404 }
+      );
+    }
 
     const agent = await db.agent.create({
       data: {
@@ -28,7 +45,13 @@ export async function POST(request: Request) {
 
     return NextResponse.json(agent, { status: 201 });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Validation error";
-    return NextResponse.json({ error: message }, { status: 400 });
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Validation failed", details: error.issues },
+        { status: 400 }
+      );
+    }
+    const message = error instanceof Error ? error.message : "Server error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

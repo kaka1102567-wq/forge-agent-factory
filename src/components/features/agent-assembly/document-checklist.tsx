@@ -35,21 +35,21 @@ export function DocumentChecklist({
     <Card>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base">Tai lieu nguon</CardTitle>
+          <CardTitle className="text-base">Tài liệu nguồn</CardTitle>
           <Button
             variant="ghost"
             size="xs"
             onClick={onToggleAll}
             disabled={disabled}
           >
-            {allSelected ? "Bo chon tat ca" : "Chon tat ca"}
+            {allSelected ? "Bỏ chọn tất cả" : "Chọn tất cả"}
           </Button>
         </div>
         <p className="text-xs text-muted-foreground">
-          {selected.length}/{documents.length} tai lieu da chon
+          {selected.length}/{documents.length} tài liệu đã chọn
           {approvedDocs.length < documents.length && (
             <span className="ml-1">
-              ({approvedDocs.length} da duyet)
+              ({approvedDocs.length} đã duyệt)
             </span>
           )}
         </p>
@@ -57,7 +57,7 @@ export function DocumentChecklist({
       <CardContent className="space-y-1 pt-0">
         {documents.length === 0 ? (
           <p className="py-4 text-center text-sm text-muted-foreground">
-            Chua co tai lieu nao.
+            Chưa có tài liệu nào.
           </p>
         ) : (
           documents.map((doc) => {

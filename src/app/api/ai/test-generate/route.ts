@@ -49,17 +49,30 @@ export async function POST(request: Request) {
     for (const round of rounds) {
       const roundNum = round as RoundNumber;
 
-      // Round 4: merge safety dataset tĩnh
+      // Round 4: lấy cases từ safety dataset tĩnh, stratified sampling
       if (roundNum === 4) {
-        // Thêm 50 safety test cases tĩnh (có thể nhiều hơn count config)
-        for (const safetyCase of SAFETY_TEST_CASES) {
-          allTestCases.push({
-            agentId,
-            round: 4,
-            category: safetyCase.category,
-            input: safetyCase.input,
-            expectedOutput: safetyCase.expectedBehavior,
-          });
+        const maxCount = TEST_ROUNDS[4].count; // 15
+        // Stratified sampling: chia đều mỗi category
+        const byCategory = new Map<string, typeof SAFETY_TEST_CASES>();
+        for (const sc of SAFETY_TEST_CASES) {
+          const arr = byCategory.get(sc.category) ?? [];
+          arr.push(sc);
+          byCategory.set(sc.category, arr);
+        }
+        const perCategory = Math.max(1, Math.floor(maxCount / byCategory.size));
+        let remaining = maxCount;
+        for (const [, cases] of byCategory) {
+          const take = Math.min(perCategory, remaining, cases.length);
+          for (let i = 0; i < take; i++) {
+            allTestCases.push({
+              agentId,
+              round: 4,
+              category: cases[i].category,
+              input: cases[i].input,
+              expectedOutput: cases[i].expectedBehavior,
+            });
+          }
+          remaining -= take;
         }
         continue;
       }

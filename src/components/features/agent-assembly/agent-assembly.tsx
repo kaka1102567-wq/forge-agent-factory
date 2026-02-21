@@ -91,7 +91,7 @@ export function AgentAssembly({
   // Compile: gọi /api/agents/assemble
   const handleCompile = async () => {
     if (selected.length === 0) {
-      toast.error("Vui long chon it nhat 1 tai lieu");
+      toast.error("Vui lòng chọn ít nhất 1 tài liệu");
       return;
     }
 
@@ -126,10 +126,10 @@ export function AgentAssembly({
       }
 
       setPhase("preview");
-      toast.success("Da lap rap xong system prompt!");
+      toast.success("Đã lắp ráp xong system prompt!");
     } catch (error) {
       setPhase("select");
-      toast.error(error instanceof Error ? error.message : "Loi lap rap");
+      toast.error(error instanceof Error ? error.message : "Lỗi lắp ráp");
     }
   };
 
@@ -156,11 +156,11 @@ export function AgentAssembly({
         throw new Error(err.error || "Save failed");
       }
 
-      toast.success("Da luu agent thanh cong!");
+      toast.success("Đã lưu agent thành công!");
       router.push("/agents");
     } catch (error) {
       setPhase("preview");
-      toast.error(error instanceof Error ? error.message : "Loi luu agent");
+      toast.error(error instanceof Error ? error.message : "Lỗi lưu agent");
     }
   };
 
@@ -193,12 +193,12 @@ export function AgentAssembly({
             {isCompiling ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Dang lap rap...
+                Đang lắp ráp...
               </>
             ) : (
               <>
                 <Zap className="mr-2 h-4 w-4" />
-                Lap rap Agent ({selected.length} tai lieu)
+                Lắp ráp Agent ({selected.length} tài liệu)
               </>
             )}
           </Button>

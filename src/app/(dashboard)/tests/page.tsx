@@ -28,7 +28,7 @@ export default async function TestsPage() {
       <div className="mb-6">
         <h2 className="text-2xl font-bold">Tests</h2>
         <p className="text-sm text-muted-foreground">
-          Chay test va xem ket qua danh gia agent.
+          Chạy test và xem kết quả đánh giá agent.
         </p>
       </div>
 
@@ -40,15 +40,15 @@ export default async function TestsPage() {
                 <th className="px-4 py-3 text-left font-medium">Agent</th>
                 <th className="px-4 py-3 text-left font-medium">Domain</th>
                 <th className="px-4 py-3 text-center font-medium">
-                  Tien do
+                  Tiến độ
                 </th>
                 <th className="px-4 py-3 text-center font-medium">
-                  Trang thai
+                  Trạng thái
                 </th>
                 <th className="hidden px-4 py-3 text-left font-medium sm:table-cell">
-                  Test gan nhat
+                  Test gần nhất
                 </th>
-                <th className="px-4 py-3 text-right font-medium">Hanh dong</th>
+                <th className="px-4 py-3 text-right font-medium">Hành động</th>
               </tr>
             </thead>
             <tbody>
@@ -100,7 +100,7 @@ export default async function TestsPage() {
                                     ? "bg-red-500"
                                     : "bg-muted-foreground/30"
                               }`}
-                              title={`V${round}: ${result?.passed ? "Pass" : result ? "Fail" : "Chua test"}`}
+                              title={`V${round}: ${result?.passed ? "Pass" : result ? "Fail" : "Chưa test"}`}
                             />
                           );
                         })}
@@ -119,11 +119,11 @@ export default async function TestsPage() {
                         ? new Date(lastTest.createdAt).toLocaleDateString(
                             "vi-VN"
                           )
-                        : "Chua test"}
+                        : "Chưa test"}
                     </td>
                     <td className="px-4 py-3 text-right">
                       <Button size="xs" variant="outline" asChild>
-                        <Link href={`/tests/${agent.id}`}>Chay test</Link>
+                        <Link href={`/tests/${agent.id}`}>Chạy test</Link>
                       </Button>
                     </td>
                   </tr>
@@ -135,12 +135,12 @@ export default async function TestsPage() {
       ) : (
         <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16">
           <FlaskConical className="mb-4 h-12 w-12 text-muted-foreground/50" />
-          <h3 className="mb-1 text-lg font-medium">Chua co agent nao</h3>
+          <h3 className="mb-1 text-lg font-medium">Chưa có agent nào</h3>
           <p className="mb-4 text-sm text-muted-foreground">
-            Tao agent truoc de bat dau test.
+            Tạo agent trước để bắt đầu test.
           </p>
           <Button asChild>
-            <Link href="/agents">Di toi Agents</Link>
+            <Link href="/agents">Đi tới Agents</Link>
           </Button>
         </div>
       )}

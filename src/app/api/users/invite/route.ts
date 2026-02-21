@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod/v4";
+import { randomBytes } from "crypto";
 import bcrypt from "bcryptjs";
 import { withRole } from "@/lib/auth/helpers";
 import { db } from "@/lib/db";
@@ -30,8 +31,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // Tạo mật khẩu tạm = 6 ký tự ngẫu nhiên
-    const tempPassword = Math.random().toString(36).slice(2, 8);
+    // Tạo mật khẩu tạm = 8 ký tự hex ngẫu nhiên (crypto-safe)
+    const tempPassword = randomBytes(4).toString("hex");
     const passwordHash = await bcrypt.hash(tempPassword, 12);
 
     const user = await db.user.create({

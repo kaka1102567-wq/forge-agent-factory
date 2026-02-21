@@ -144,6 +144,7 @@ model Document {
   domain   Domain    @relation(fields: [domainId], references: [id], onDelete: Cascade)
   template Template? @relation(fields: [templateId], references: [id], onDelete: SetNull)
 
+  @@index([domainId])
   @@map("documents")
 }
 
@@ -166,6 +167,7 @@ model Agent {
   costLogs     CostLog[]
   activityLogs ActivityLog[]
 
+  @@index([domainId])
   @@map("agents")
 }
 
@@ -185,6 +187,7 @@ model TestCase {
 
   agent Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
 
+  @@index([agentId])
   @@map("test_cases")
 }
 

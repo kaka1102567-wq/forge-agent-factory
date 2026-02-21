@@ -58,7 +58,10 @@ export default async function DashboardPage() {
   const activities = await db.activityLog.findMany({
     take: 20,
     orderBy: { createdAt: "desc" },
-    include: { agent: { select: { name: true } } },
+    include: {
+      agent: { select: { name: true } },
+      user: { select: { name: true } },
+    },
   });
 
   const serializedActivities = activities.map((a) => ({
@@ -66,6 +69,7 @@ export default async function DashboardPage() {
     type: a.type,
     description: a.description,
     agentName: a.agent?.name ?? null,
+    userName: a.user?.name ?? null,
     createdAt: a.createdAt.toISOString(),
   }));
 

@@ -14,14 +14,16 @@ import {
 import { auth } from "@/auth";
 import { UserMenu } from "@/components/features/auth/user-menu";
 
-const baseNavItems = [
+type NavItem = { label: string; href: string; icon: React.ComponentType<{ className?: string }>; roles?: string[] };
+
+const allNavItems: NavItem[] = [
   { label: "Dashboard", href: "/", icon: LayoutDashboard },
-  { label: "Quick Mode", href: "/quick", icon: Zap },
+  { label: "Quick Mode", href: "/quick", icon: Zap, roles: ["ADMIN", "EDITOR"] },
   { label: "Domains", href: "/domains", icon: Globe },
   { label: "Documents", href: "/documents", icon: FileText },
   { label: "Agents", href: "/agents", icon: Bot },
   { label: "Tests", href: "/tests", icon: FlaskConical },
-  { label: "Deploy", href: "/deploy", icon: Rocket },
+  { label: "Deploy", href: "/deploy", icon: Rocket, roles: ["ADMIN"] },
   { label: "Costs", href: "/costs", icon: DollarSign },
 ];
 
@@ -33,9 +35,10 @@ export default async function DashboardLayout({
   const session = await auth();
   if (!session?.user) redirect("/login");
 
-  const navItems = [
-    ...baseNavItems,
-    ...(session.user.role === "ADMIN"
+  const role = session.user.role;
+  const navItems: NavItem[] = [
+    ...allNavItems.filter((item) => !item.roles || item.roles.includes(role)),
+    ...(role === "ADMIN"
       ? [{ label: "Cài đặt", href: "/settings/users", icon: Settings }]
       : []),
   ];

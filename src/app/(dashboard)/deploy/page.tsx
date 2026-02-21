@@ -19,6 +19,7 @@ export default async function DeployPage() {
     name: agent.name,
     archetype: agent.archetype,
     status: agent.status,
+    quickMode: agent.quickMode,
     domain: { name: agent.domain.name },
     testResults: agent.testResults.map((r) => ({
       round: r.round,

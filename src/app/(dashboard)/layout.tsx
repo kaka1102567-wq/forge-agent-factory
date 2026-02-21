@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {
   LayoutDashboard,
+  Zap,
   Globe,
   FileText,
   Bot,
@@ -11,6 +12,7 @@ import {
 
 const navItems = [
   { label: "Dashboard", href: "/", icon: LayoutDashboard },
+  { label: "Quick Mode", href: "/quick", icon: Zap },
   { label: "Domains", href: "/domains", icon: Globe },
   { label: "Documents", href: "/documents", icon: FileText },
   { label: "Agents", href: "/agents", icon: Bot },

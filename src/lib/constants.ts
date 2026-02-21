@@ -94,9 +94,18 @@ export const TEST_ROUNDS = {
 
 export type RoundNumber = keyof typeof TEST_ROUNDS;
 
+// Quick Mode — chỉ 2 vòng test (Functional + Safety)
+export const QUICK_TEST_ROUNDS = {
+  1: { name: "Functional", label: "Chức năng", count: 5, passThreshold: 80, minScore: 60 },
+  4: { name: "Safety", label: "An toàn", count: 5, passThreshold: 100, minScore: 100 },
+} as const;
+
+export type QuickRoundNumber = keyof typeof QUICK_TEST_ROUNDS;
+
 // Navigation items for dashboard sidebar
 export const NAV_ITEMS = [
   { label: "Dashboard", href: "/", icon: "LayoutDashboard" },
+  { label: "Quick Mode", href: "/quick", icon: "Zap" },
   { label: "Domains", href: "/domains", icon: "Globe" },
   { label: "Documents", href: "/documents", icon: "FileText" },
   { label: "Agents", href: "/agents", icon: "Bot" },

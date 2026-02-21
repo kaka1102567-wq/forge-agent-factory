@@ -48,6 +48,7 @@ interface AgentForDeploy {
   name: string;
   archetype: string;
   status: AgentStatus;
+  quickMode: boolean;
   domain: { name: string };
   testResults: TestResult[];
   deployments: DeploymentInfo[];
@@ -96,9 +97,12 @@ export function DeployCenter({ agents }: DeployCenterProps) {
   const [copied, setCopied] = useState(false);
   const [healthChecking, setHealthChecking] = useState(false);
 
-  // Kiểm tra agent đã pass đủ 6 rounds chưa
+  // Kiểm tra agent đã pass đủ test — Quick Mode chỉ cần R1 + R4
   const isDeployable = useCallback((agent: AgentForDeploy) => {
     const passedRounds = agent.testResults.filter((r) => r.passed);
+    if (agent.quickMode) {
+      return passedRounds.some((r) => r.round === 1) && passedRounds.some((r) => r.round === 4);
+    }
     return passedRounds.length >= 6;
   }, []);
 
@@ -275,23 +279,28 @@ export function DeployCenter({ agents }: DeployCenterProps) {
                         {agent.domain.name} &middot; {agent.archetype}
                       </p>
                     </div>
-                    <Badge
-                      variant={
-                        agent.status === "DEPLOYED"
-                          ? "default"
-                          : agent.status === "ACTIVE"
+                    <div className="flex items-center gap-1.5">
+                      {agent.quickMode && (
+                        <Badge variant="outline">Quick</Badge>
+                      )}
+                      <Badge
+                        variant={
+                          agent.status === "DEPLOYED"
                             ? "default"
-                            : "secondary"
-                      }
-                    >
-                      {agent.status}
-                    </Badge>
+                            : agent.status === "ACTIVE"
+                              ? "default"
+                              : "secondary"
+                        }
+                      >
+                        {agent.status}
+                      </Badge>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {/* Test progress dots */}
                   <div className="flex items-center gap-1">
-                    {[1, 2, 3, 4, 5, 6].map((round) => {
+                    {(agent.quickMode ? [1, 4] : [1, 2, 3, 4, 5, 6]).map((round) => {
                       const result = agent.testResults.find(
                         (r) => r.round === round
                       );
@@ -310,7 +319,7 @@ export function DeployCenter({ agents }: DeployCenterProps) {
                       );
                     })}
                     <span className="ml-2 text-xs text-muted-foreground">
-                      {passedRounds}/6 vòng
+                      {passedRounds}/{agent.quickMode ? 2 : 6} vòng
                     </span>
                   </div>
 
@@ -387,7 +396,9 @@ export function DeployCenter({ agents }: DeployCenterProps) {
                   ) : (
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                       <AlertTriangle className="h-3 w-3" />
-                      Cần hoàn thành 6/6 vòng test để deploy
+                      {agent.quickMode
+                        ? "Cần pass round 1 (Chức năng) + round 4 (An toàn)"
+                        : "Cần hoàn thành 6/6 vòng test để deploy"}
                     </div>
                   )}
                 </CardContent>

@@ -9,6 +9,7 @@ interface AgentItem {
   name: string;
   archetype: string;
   status: AgentStatus;
+  quickMode?: boolean;
   createdAt: string;
   domain: { id: string; name: string };
 }
@@ -74,9 +75,14 @@ export function AgentListTable({ agents }: AgentListTableProps) {
                 {agent.domain.name}
               </td>
               <td className="px-4 py-3">
-                <Badge variant={STATUS_VARIANT[agent.status]}>
-                  {agent.status}
-                </Badge>
+                <div className="flex items-center gap-1.5">
+                  {agent.quickMode && (
+                    <Badge variant="outline" className="text-xs">Quick</Badge>
+                  )}
+                  <Badge variant={STATUS_VARIANT[agent.status]}>
+                    {agent.status}
+                  </Badge>
+                </div>
               </td>
               <td className="hidden px-4 py-3 text-muted-foreground sm:table-cell">
                 {new Date(agent.createdAt).toLocaleDateString("vi-VN")}

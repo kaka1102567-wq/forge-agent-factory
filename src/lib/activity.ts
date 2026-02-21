@@ -11,7 +11,8 @@ export type ActivityType =
   | "agent_create"
   | "agent_assemble"
   | "doc_generate"
-  | "health_check";
+  | "health_check"
+  | "quick_build";
 
 /**
  * Ghi một activity log vào DB (fire-and-forget)

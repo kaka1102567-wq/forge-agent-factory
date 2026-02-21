@@ -30,6 +30,7 @@ export default async function AgentsPage() {
             name: a.name,
             archetype: a.archetype,
             status: a.status,
+            quickMode: a.quickMode,
             createdAt: a.createdAt.toISOString(),
             domain: { id: a.domain.id, name: a.domain.name },
           }))}

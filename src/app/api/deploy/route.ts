@@ -29,18 +29,33 @@ export async function POST(request: Request) {
       );
     }
 
-    // Kiểm tra agent đã pass ALL 6 vòng test
+    // Kiểm tra test — Quick Mode chỉ cần round 1 + 4, Quality Mode cần 6/6
     const passedRounds = agent.testResults.filter((r) => r.passed);
-    if (passedRounds.length < 6) {
-      const missing = 6 - passedRounds.length;
-      return NextResponse.json(
-        {
-          error: `Agent chưa hoàn thành test. Còn thiếu ${missing} vòng test.`,
-          passedRounds: passedRounds.length,
-          requiredRounds: 6,
-        },
-        { status: 400 }
-      );
+    if (agent.quickMode) {
+      const hasR1 = passedRounds.some((r) => r.round === 1);
+      const hasR4 = passedRounds.some((r) => r.round === 4);
+      if (!hasR1 || !hasR4) {
+        return NextResponse.json(
+          {
+            error: "Quick Mode agent cần pass round 1 (Chức năng) và round 4 (An toàn).",
+            passedRounds: passedRounds.map((r) => r.round),
+            requiredRounds: [1, 4],
+          },
+          { status: 400 }
+        );
+      }
+    } else {
+      if (passedRounds.length < 6) {
+        const missing = 6 - passedRounds.length;
+        return NextResponse.json(
+          {
+            error: `Agent chưa hoàn thành test. Còn thiếu ${missing} vòng test.`,
+            passedRounds: passedRounds.length,
+            requiredRounds: 6,
+          },
+          { status: 400 }
+        );
+      }
     }
 
     // Tạo hoặc cập nhật deployment

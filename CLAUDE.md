@@ -123,4 +123,4 @@ Zod for all API input validation. Validate at route handler level before DB oper
 - ESLint config `core-web-vitals` import path cần fix cho eslint-config-next mới
 
 ## Current Sprint
-Phase 2 - Week 2: Dashboard & Monitoring Hub (WP-07)
+Phase 2 - Week 3: Quick Mode — 1-Click Agent (WP-08)

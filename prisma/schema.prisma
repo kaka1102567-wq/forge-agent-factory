@@ -111,6 +111,7 @@ model Agent {
   archetype    String      // Kiểu agent: sales, support, onboarding...
   systemPrompt String      @db.Text
   config       Json        // Cấu hình mở rộng: temperature, max_tokens...
+  quickMode    Boolean     @default(false) // Tạo từ Quick Mode
   status       AgentStatus @default(DRAFT)
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt

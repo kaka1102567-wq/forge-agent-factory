@@ -3,8 +3,12 @@ import { ChatPreviewRequestSchema } from "@/lib/schemas/agent-config";
 import { sendMessage, classifyError } from "@/lib/ai/client";
 import { MODEL_MAP, TIER_TIMEOUT, type ModelTier } from "@/lib/ai/router";
 import { calculateCost, logRequest } from "@/lib/ai/cost";
+import { withRole } from "@/lib/auth/helpers";
 
 export async function POST(request: Request) {
+  const authResult = await withRole(["ADMIN", "EDITOR"]);
+  if (authResult instanceof NextResponse) return authResult;
+
   try {
     const body = await request.json();
     const data = ChatPreviewRequestSchema.parse(body);

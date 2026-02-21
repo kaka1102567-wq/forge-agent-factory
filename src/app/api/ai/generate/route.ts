@@ -9,6 +9,7 @@ import {
   type DocGenerateInput,
 } from "@/lib/ai/prompts/doc-generate";
 import { logActivity } from "@/lib/activity";
+import { withRole } from "@/lib/auth/helpers";
 
 const GenerateRequestSchema = z.object({
   domainId: z.string().min(1),
@@ -17,6 +18,9 @@ const GenerateRequestSchema = z.object({
 
 // Sinh nội dung tài liệu từ Domain + Template — dùng Sonnet
 export async function POST(request: Request) {
+  const authResult = await withRole(["ADMIN", "EDITOR"]);
+  if (authResult instanceof NextResponse) return authResult;
+
   try {
     const body = await request.json();
     const { domainId, templateId } = GenerateRequestSchema.parse(body);
@@ -80,6 +84,7 @@ export async function POST(request: Request) {
     });
 
     logActivity("doc_generate", `Sinh tài liệu "${title}" cho domain "${domain.name}"`, {
+      userId: authResult.user.id,
       metadata: { documentId: document.id, domainId, templateId, modelUsed, cost },
     });
 

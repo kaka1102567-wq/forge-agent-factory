@@ -1,6 +1,8 @@
+import { NextResponse } from "next/server";
 import { z } from "zod/v4";
 import { db } from "@/lib/db";
 import { routeTask } from "@/lib/ai/router";
+import { withRole } from "@/lib/auth/helpers";
 import { stripMarkdownJson } from "@/lib/ai/client";
 import { DOMAIN_CLASSIFY_PROMPT, DomainClassifyOutputSchema } from "@/lib/ai/prompts/domain-classify";
 import { QUICK_DOC_GENERATE_PROMPT, QuickDocGenerateOutputSchema } from "@/lib/ai/prompts/quick-doc-generate";
@@ -438,7 +440,8 @@ async function stepRunTests(
 async function stepFinalize(
   ctx: PipelineContext,
   agentId: string,
-  deployReady: boolean
+  deployReady: boolean,
+  userId?: string
 ) {
   sseEvent(ctx.writer, "step_start", { step: 7, name: "Hoàn tất" });
   sseEvent(ctx.writer, "progress", { percent: 95, message: "Đang hoàn tất..." });
@@ -451,6 +454,7 @@ async function stepFinalize(
 
   logActivity("quick_build", `Quick Build hoàn tất (${deployReady ? "sẵn sàng deploy" : "cần cải thiện"})`, {
     agentId,
+    userId,
     metadata: { totalCost: ctx.totalCost, deployReady },
   });
 
@@ -461,6 +465,9 @@ async function stepFinalize(
 // === Main Route Handler ===
 
 export async function POST(request: Request) {
+  const authResult = await withRole(["ADMIN", "EDITOR"]);
+  if (authResult instanceof NextResponse) return authResult;
+
   let body: unknown;
   try {
     body = await request.json();
@@ -497,12 +504,14 @@ export async function POST(request: Request) {
 
     try {
       logActivity("quick_build", "Quick Build bắt đầu", {
+        userId: authResult.user.id,
         metadata: { businessDescription: ctx.businessDescription, channels: ctx.channels },
       });
 
       // Step 1: Classify
       const classification = await stepClassify(ctx);
       logActivity("quick_build", "Quick Build — phân loại domain xong", {
+        userId: authResult.user.id,
         metadata: { industry: classification.industry, function: classification.function },
       });
 
@@ -516,6 +525,7 @@ export async function POST(request: Request) {
       // Step 3: Generate Docs
       const { parsed: docsParsed } = await stepGenerateDocs(ctx, domainWithChannels);
       logActivity("quick_build", "Quick Build — sinh 3 tài liệu xong", {
+        userId: authResult.user.id,
         metadata: { documentCount: docsParsed.length },
       });
 
@@ -524,6 +534,7 @@ export async function POST(request: Request) {
 
       logActivity("quick_build", "Quick Build — lắp ráp agent xong", {
         agentId: agent.id,
+        userId: authResult.user.id,
         metadata: { agentName: agent.name },
       });
 
@@ -554,6 +565,7 @@ export async function POST(request: Request) {
 
       logActivity("quick_build", "Quick Build — test hoàn tất", {
         agentId: agent.id,
+        userId: authResult.user.id,
         metadata: {
           round1Passed: testResults.round1Passed,
           round4Passed: testResults.round4Passed,
@@ -562,7 +574,7 @@ export async function POST(request: Request) {
 
       // Step 7: Finalize
       const deployReady = testResults.round1Passed && testResults.round4Passed;
-      await stepFinalize(ctx, agent.id, deployReady);
+      await stepFinalize(ctx, agent.id, deployReady, authResult.user.id);
 
       // Final complete event
       sseEvent(writer, "complete", {

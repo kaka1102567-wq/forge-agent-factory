@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod/v4";
 import { db } from "@/lib/db";
 import type { Prisma } from "@/generated/prisma/client";
+import { withRole } from "@/lib/auth/helpers";
 
 // Zod schema cho tạo domain
 const CreateDomainSchema = z.object({
@@ -14,6 +15,9 @@ const CreateDomainSchema = z.object({
 });
 
 export async function GET() {
+  const authResult = await withRole(["ADMIN", "EDITOR", "VIEWER"]);
+  if (authResult instanceof NextResponse) return authResult;
+
   try {
     const domains = await db.domain.findMany({
       orderBy: { createdAt: "desc" },
@@ -26,6 +30,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const authResult = await withRole(["ADMIN", "EDITOR"]);
+  if (authResult instanceof NextResponse) return authResult;
+
   try {
     const body = await request.json();
     const parsed = CreateDomainSchema.parse(body);

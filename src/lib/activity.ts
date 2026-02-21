@@ -20,7 +20,11 @@ export type ActivityType =
 export function logActivity(
   type: ActivityType,
   description: string,
-  options?: { agentId?: string; metadata?: Record<string, unknown> }
+  options?: {
+    agentId?: string;
+    userId?: string;
+    metadata?: Record<string, unknown>;
+  }
 ): void {
   db.activityLog
     .create({
@@ -28,6 +32,7 @@ export function logActivity(
         type,
         description,
         agentId: options?.agentId ?? null,
+        userId: options?.userId ?? null,
         metadata: (options?.metadata as Prisma.InputJsonValue) ?? undefined,
       },
     })

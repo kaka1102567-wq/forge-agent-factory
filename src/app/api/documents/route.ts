@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod/v4";
 import { db } from "@/lib/db";
+import { withRole } from "@/lib/auth/helpers";
 
 const CreateDocumentSchema = z.object({
   domainId: z.string().min(1),
@@ -10,6 +11,9 @@ const CreateDocumentSchema = z.object({
 });
 
 export async function GET(request: Request) {
+  const authResult = await withRole(["ADMIN", "EDITOR", "VIEWER"]);
+  if (authResult instanceof NextResponse) return authResult;
+
   try {
     const { searchParams } = new URL(request.url);
     const domainId = searchParams.get("domainId");
@@ -28,6 +32,9 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const authResult = await withRole(["ADMIN", "EDITOR"]);
+  if (authResult instanceof NextResponse) return authResult;
+
   try {
     const body = await request.json();
     const data = CreateDocumentSchema.parse(body);

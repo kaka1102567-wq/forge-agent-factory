@@ -8,8 +8,12 @@ import {
   type AgentAssembleInput,
 } from "@/lib/ai/prompts/agent-assemble";
 import { logActivity } from "@/lib/activity";
+import { withRole } from "@/lib/auth/helpers";
 
 export async function POST(request: Request) {
+  const authResult = await withRole(["ADMIN", "EDITOR"]);
+  if (authResult instanceof NextResponse) return authResult;
+
   try {
     const body = await request.json();
     const data = AssembleRequestSchema.parse(body);
@@ -75,6 +79,7 @@ export async function POST(request: Request) {
     const parsed = JSON.parse(jsonText);
 
     logActivity("agent_assemble", `Lắp ráp agent cho domain "${domain.name}" (${documents.length} tài liệu)`, {
+      userId: authResult.user.id,
       metadata: { domainId: data.domainId, archetype, modelUsed: result.modelUsed, cost: result.cost },
     });
 

@@ -10,6 +10,7 @@ import {
   type QualityScoreInput,
   type QualityScoreOutput,
 } from "@/lib/ai/prompts/quality-score";
+import { withRole } from "@/lib/auth/helpers";
 
 const ScoreRequestSchema = z.object({
   documentId: z.string().min(1),
@@ -17,6 +18,9 @@ const ScoreRequestSchema = z.object({
 
 // Chấm điểm chất lượng document — dùng Haiku
 export async function POST(request: Request) {
+  const authResult = await withRole(["ADMIN", "EDITOR"]);
+  if (authResult instanceof NextResponse) return authResult;
+
   try {
     const body = await request.json();
     const { documentId } = ScoreRequestSchema.parse(body);
@@ -65,6 +69,7 @@ export async function POST(request: Request) {
     });
 
     logActivity("quality_score", `Chấm điểm document "${document.title}": ${scoreData.score}/100`, {
+      userId: authResult.user.id,
       metadata: { documentId, score: scoreData.score, modelUsed, cost },
     });
 

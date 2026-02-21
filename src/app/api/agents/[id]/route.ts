@@ -3,6 +3,7 @@ import { z } from "zod/v4";
 import { db } from "@/lib/db";
 import { logActivity } from "@/lib/activity";
 import { AgentConfigSchema } from "@/lib/schemas/agent-config";
+import { withRole } from "@/lib/auth/helpers";
 
 const UpdateAgentSchema = z.object({
   name: z.string().min(1).optional(),
@@ -15,6 +16,9 @@ export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const authResult = await withRole(["ADMIN", "EDITOR", "VIEWER"]);
+  if (authResult instanceof NextResponse) return authResult;
+
   try {
     const { id } = await params;
     const agent = await db.agent.findUniqueOrThrow({
@@ -31,6 +35,9 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const authResult = await withRole(["ADMIN", "EDITOR"]);
+  if (authResult instanceof NextResponse) return authResult;
+
   try {
     const { id } = await params;
     const body = await request.json();
@@ -58,6 +65,7 @@ export async function PATCH(
     if (data.status) {
       logActivity("status_change", `Agent "${agent.name}" → ${data.status}`, {
         agentId: id,
+        userId: authResult.user.id,
         metadata: { newStatus: data.status },
       });
     }

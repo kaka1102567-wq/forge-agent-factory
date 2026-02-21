@@ -1,6 +1,8 @@
+import { NextResponse } from "next/server";
 import { z } from "zod/v4";
 import { db } from "@/lib/db";
 import { logActivity } from "@/lib/activity";
+import { withRole } from "@/lib/auth/helpers";
 import {
   executeTestCase,
   type AgentData,
@@ -18,6 +20,9 @@ export async function POST(
   request: Request,
   { params }: { params: Promise<{ agentId: string }> }
 ) {
+  const authResult = await withRole(["ADMIN", "EDITOR"]);
+  if (authResult instanceof NextResponse) return authResult;
+
   const { agentId } = await params;
 
   let round: number | undefined;
@@ -86,6 +91,7 @@ export async function POST(
 
   logActivity("test_run", `Bắt đầu chạy test cho agent "${agent.name}"`, {
     agentId,
+    userId: authResult.user.id,
     metadata: { rounds: roundsToRun, totalCases: testCases.length },
   });
 
@@ -262,6 +268,7 @@ export async function POST(
           if (!roundPassed && !round) {
             logActivity("test_complete", `Test thất bại cho agent "${agent.name}" tại vòng ${roundNum}`, {
               agentId,
+              userId: authResult.user.id,
               metadata: { status: "failed", failedAt: roundNum, round: roundConfig.label },
             });
 
@@ -278,6 +285,7 @@ export async function POST(
         // Tất cả rounds passed
         logActivity("test_complete", `Test hoàn thành cho agent "${agent.name}": PASSED`, {
           agentId,
+          userId: authResult.user.id,
           metadata: { status: "passed", rounds: roundsToRun },
         });
 

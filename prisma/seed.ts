@@ -2,6 +2,7 @@ import "dotenv/config";
 import pg from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../src/generated/prisma/client";
+import bcrypt from "bcryptjs";
 
 // Prisma v7 — dùng PG adapter để kết nối trực tiếp DB
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
@@ -227,6 +228,22 @@ async function main() {
   }
 
   console.log("Seeding complete!");
+
+  // Seed default admin user
+  console.log("Seeding default admin user...");
+  const passwordHash = await bcrypt.hash("admin123", 12);
+  await prisma.user.upsert({
+    where: { email: "admin@forge.local" },
+    update: {},
+    create: {
+      email: "admin@forge.local",
+      name: "Admin",
+      passwordHash,
+      role: "ADMIN",
+      active: true,
+    },
+  });
+  console.log("  Admin user: admin@forge.local / admin123");
 }
 
 main()

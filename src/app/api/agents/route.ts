@@ -3,8 +3,12 @@ import { z } from "zod/v4";
 import { db } from "@/lib/db";
 import { CreateAgentSchema } from "@/lib/schemas/agent-config";
 import { logActivity } from "@/lib/activity";
+import { withRole } from "@/lib/auth/helpers";
 
 export async function GET() {
+  const authResult = await withRole(["ADMIN", "EDITOR", "VIEWER"]);
+  if (authResult instanceof NextResponse) return authResult;
+
   try {
     const agents = await db.agent.findMany({
       orderBy: { createdAt: "desc" },
@@ -18,6 +22,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const authResult = await withRole(["ADMIN", "EDITOR"]);
+  if (authResult instanceof NextResponse) return authResult;
+
   try {
     const body = await request.json();
     const data = CreateAgentSchema.parse(body);
@@ -46,6 +53,7 @@ export async function POST(request: Request) {
 
     logActivity("agent_create", `Tạo agent "${agent.name}" cho domain "${agent.domain.name}"`, {
       agentId: agent.id,
+      userId: authResult.user.id,
       metadata: { domainId: data.domainId, archetype: data.archetype },
     });
 

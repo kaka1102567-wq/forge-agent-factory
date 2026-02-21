@@ -1,12 +1,16 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { TEST_ROUNDS } from "@/lib/constants";
+import { withRole } from "@/lib/auth/helpers";
 
 // Lấy test data cho agent: test cases (grouped by round) + test results
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ agentId: string }> }
 ) {
+  const authResult = await withRole(["ADMIN", "EDITOR", "VIEWER"]);
+  if (authResult instanceof NextResponse) return authResult;
+
   const { agentId } = await params;
 
   const agent = await db.agent.findUnique({

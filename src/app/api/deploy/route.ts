@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod/v4";
 import { db } from "@/lib/db";
 import { logActivity } from "@/lib/activity";
+import { withRole } from "@/lib/auth/helpers";
 import type { Prisma } from "@/generated/prisma/client";
 
 const DeploySchema = z.object({
@@ -12,6 +13,9 @@ const DeploySchema = z.object({
 
 // POST /api/deploy — Deploy agent lên kênh
 export async function POST(request: Request) {
+  const authResult = await withRole(["ADMIN"]);
+  if (authResult instanceof NextResponse) return authResult;
+
   try {
     const body = await request.json();
     const { agentId, channel, config } = DeploySchema.parse(body);
@@ -87,6 +91,7 @@ export async function POST(request: Request) {
 
     logActivity("deploy", `Deploy agent lên kênh ${channel}`, {
       agentId,
+      userId: authResult.user.id,
       metadata: { channel, deploymentId: deployment.id },
     });
 

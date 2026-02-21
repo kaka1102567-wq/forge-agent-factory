@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import {
   LayoutDashboard,
   Zap,
@@ -8,9 +9,12 @@ import {
   FlaskConical,
   Rocket,
   DollarSign,
+  Settings,
 } from "lucide-react";
+import { auth } from "@/auth";
+import { UserMenu } from "@/components/features/auth/user-menu";
 
-const navItems = [
+const baseNavItems = [
   { label: "Dashboard", href: "/", icon: LayoutDashboard },
   { label: "Quick Mode", href: "/quick", icon: Zap },
   { label: "Domains", href: "/domains", icon: Globe },
@@ -21,17 +25,27 @@ const navItems = [
   { label: "Costs", href: "/costs", icon: DollarSign },
 ];
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await auth();
+  if (!session?.user) redirect("/login");
+
+  const navItems = [
+    ...baseNavItems,
+    ...(session.user.role === "ADMIN"
+      ? [{ label: "Cài đặt", href: "/settings/users", icon: Settings }]
+      : []),
+  ];
+
   return (
     <div className="flex h-screen">
       {/* Sidebar */}
-      <aside className="w-64 border-r bg-card p-4">
+      <aside className="flex w-64 flex-col border-r bg-card p-4">
         <h1 className="mb-8 text-xl font-bold">FORGE</h1>
-        <nav className="space-y-1">
+        <nav className="flex-1 space-y-1">
           {navItems.map((item) => (
             <Link
               key={item.href}
@@ -43,6 +57,15 @@ export default function DashboardLayout({
             </Link>
           ))}
         </nav>
+
+        <UserMenu
+          user={{
+            name: session.user.name,
+            email: session.user.email,
+            image: session.user.image,
+            role: session.user.role,
+          }}
+        />
       </aside>
 
       {/* Main content */}

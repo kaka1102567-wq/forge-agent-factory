@@ -7,9 +7,13 @@ import {
   AgentAssembleInputSchema,
   AgentAssembleOutputSchema,
 } from "@/lib/ai/prompts/agent-assemble";
+import { withRole } from "@/lib/auth/helpers";
 
 // Lắp ráp agent - dùng Opus (cần reasoning mạnh)
 export async function POST(request: Request) {
+  const authResult = await withRole(["ADMIN", "EDITOR"]);
+  if (authResult instanceof NextResponse) return authResult;
+
   try {
     const body = await request.json();
     const input = AgentAssembleInputSchema.parse(body);

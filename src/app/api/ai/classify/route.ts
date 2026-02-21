@@ -7,9 +7,13 @@ import {
   DomainClassifyInputSchema,
   DomainClassifyOutputSchema,
 } from "@/lib/ai/prompts/domain-classify";
+import { withRole } from "@/lib/auth/helpers";
 
 // Phân loại domain/intent - dùng Haiku (nhanh, rẻ)
 export async function POST(request: Request) {
+  const authResult = await withRole(["ADMIN", "EDITOR"]);
+  if (authResult instanceof NextResponse) return authResult;
+
   try {
     const body = await request.json();
     const input = DomainClassifyInputSchema.parse(body);

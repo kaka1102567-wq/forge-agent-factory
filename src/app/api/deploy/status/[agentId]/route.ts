@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { withRole } from "@/lib/auth/helpers";
 
 // GET /api/deploy/status/[agentId] — Trạng thái deploy + health của agent
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ agentId: string }> }
 ) {
+  const authResult = await withRole(["ADMIN", "EDITOR", "VIEWER"]);
+  if (authResult instanceof NextResponse) return authResult;
+
   const { agentId } = await params;
 
   try {

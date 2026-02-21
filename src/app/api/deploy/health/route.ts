@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { routeTask } from "@/lib/ai/router";
+import { withRole } from "@/lib/auth/helpers";
 import type { Prisma } from "@/generated/prisma/client";
 
 // GET /api/deploy/health — Chạy health check cho tất cả active deployments
 // Gọi định kỳ (~5 phút) qua cron hoặc manual
 export async function GET() {
+  const authResult = await withRole(["ADMIN", "EDITOR", "VIEWER"]);
+  if (authResult instanceof NextResponse) return authResult;
+
   try {
     const activeDeployments = await db.deployment.findMany({
       where: { status: "ACTIVE" },

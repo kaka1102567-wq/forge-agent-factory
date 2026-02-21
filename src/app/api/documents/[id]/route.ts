@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod/v4";
 import { db } from "@/lib/db";
 import { MAX_VERSION_HISTORY } from "@/lib/constants";
+import { withRole } from "@/lib/auth/helpers";
 
 const UpdateDocumentSchema = z.object({
   title: z.string().min(1).optional(),
@@ -13,6 +14,9 @@ export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const authResult = await withRole(["ADMIN", "EDITOR", "VIEWER"]);
+  if (authResult instanceof NextResponse) return authResult;
+
   try {
     const { id } = await params;
     const document = await db.document.findUniqueOrThrow({
@@ -29,6 +33,9 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const authResult = await withRole(["ADMIN", "EDITOR"]);
+  if (authResult instanceof NextResponse) return authResult;
+
   try {
     const { id } = await params;
     const body = await request.json();

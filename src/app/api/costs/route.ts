@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod/v4";
 import { db } from "@/lib/db";
+import { withRole } from "@/lib/auth/helpers";
 
 const CostQuerySchema = z.object({
   from: z.string().optional(),
@@ -9,6 +10,9 @@ const CostQuerySchema = z.object({
 
 // GET /api/costs?from=DATE&to=DATE — Cost data với date range
 export async function GET(request: Request) {
+  const authResult = await withRole(["ADMIN", "EDITOR", "VIEWER"]);
+  if (authResult instanceof NextResponse) return authResult;
+
   try {
     const { searchParams } = new URL(request.url);
     const query = CostQuerySchema.parse({

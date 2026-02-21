@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod/v4";
 import { db } from "@/lib/db";
 import { logActivity } from "@/lib/activity";
+import { withRole } from "@/lib/auth/helpers";
 
 const RollbackSchema = z.object({
   agentId: z.string().min(1),
@@ -10,6 +11,9 @@ const RollbackSchema = z.object({
 
 // POST /api/deploy/rollback — Rollback deployment, khôi phục systemPrompt cũ
 export async function POST(request: Request) {
+  const authResult = await withRole(["ADMIN"]);
+  if (authResult instanceof NextResponse) return authResult;
+
   try {
     const body = await request.json();
     const { agentId, channel } = RollbackSchema.parse(body);
@@ -61,6 +65,7 @@ export async function POST(request: Request) {
 
     logActivity("rollback", `Rollback deployment ${channel}`, {
       agentId,
+      userId: authResult.user.id,
       metadata: { channel },
     });
 

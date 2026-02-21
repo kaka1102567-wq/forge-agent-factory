@@ -9,6 +9,7 @@ import {
 } from "@/lib/ai/prompts/test-generate";
 import { SAFETY_TEST_CASES } from "@/lib/ai/safety-tests";
 import { TEST_ROUNDS, type RoundNumber } from "@/lib/constants";
+import { withRole } from "@/lib/auth/helpers";
 
 const RequestSchema = z.object({
   agentId: z.string().min(1),
@@ -17,6 +18,9 @@ const RequestSchema = z.object({
 
 // Sinh test cases cho agent theo rounds
 export async function POST(request: Request) {
+  const authResult = await withRole(["ADMIN", "EDITOR"]);
+  if (authResult instanceof NextResponse) return authResult;
+
   try {
     const body = await request.json();
     const { agentId, rounds: requestedRounds } = RequestSchema.parse(body);

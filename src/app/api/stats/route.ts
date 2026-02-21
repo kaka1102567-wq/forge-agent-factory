@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { withRole } from "@/lib/auth/helpers";
 
 // GET /api/stats — Aggregate stats cho dashboard
 export async function GET() {
+  const authResult = await withRole(["ADMIN", "EDITOR", "VIEWER"]);
+  if (authResult instanceof NextResponse) return authResult;
+
   try {
     // Tổng agents + deployed count + quick mode count
     const [totalAgents, deployedAgents, quickModeAgents] = await Promise.all([

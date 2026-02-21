@@ -10,16 +10,21 @@ const CreateDocumentSchema = z.object({
 });
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const domainId = searchParams.get("domainId");
+  try {
+    const { searchParams } = new URL(request.url);
+    const domainId = searchParams.get("domainId");
 
-  const documents = await db.document.findMany({
-    where: domainId ? { domainId } : undefined,
-    orderBy: { createdAt: "desc" },
-    include: { domain: true, template: true },
-  });
+    const documents = await db.document.findMany({
+      where: domainId ? { domainId } : undefined,
+      orderBy: { createdAt: "desc" },
+      include: { domain: true, template: true },
+    });
 
-  return NextResponse.json(documents);
+    return NextResponse.json(documents);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Database error";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }
 
 export async function POST(request: Request) {

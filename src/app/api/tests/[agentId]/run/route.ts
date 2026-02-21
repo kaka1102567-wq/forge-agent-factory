@@ -260,6 +260,11 @@ export async function POST(
 
           // Nếu round fail và không phải run single → dừng pipeline
           if (!roundPassed && !round) {
+            logActivity("test_complete", `Test thất bại cho agent "${agent.name}" tại vòng ${roundNum}`, {
+              agentId,
+              metadata: { status: "failed", failedAt: roundNum, round: roundConfig.label },
+            });
+
             send("complete", {
               status: "failed",
               failedAt: roundNum,
@@ -271,6 +276,11 @@ export async function POST(
         }
 
         // Tất cả rounds passed
+        logActivity("test_complete", `Test hoàn thành cho agent "${agent.name}": PASSED`, {
+          agentId,
+          metadata: { status: "passed", rounds: roundsToRun },
+        });
+
         send("complete", {
           status: "passed",
           message: "Tất cả vòng test đã hoàn thành",

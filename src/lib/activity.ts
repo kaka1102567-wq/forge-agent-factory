@@ -5,9 +5,12 @@ export type ActivityType =
   | "deploy"
   | "rollback"
   | "test_run"
+  | "test_complete"
   | "quality_score"
   | "status_change"
   | "agent_create"
+  | "agent_assemble"
+  | "doc_generate"
   | "health_check";
 
 /**

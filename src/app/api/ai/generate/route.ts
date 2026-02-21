@@ -8,6 +8,7 @@ import {
   DocGenerateOutputSchema,
   type DocGenerateInput,
 } from "@/lib/ai/prompts/doc-generate";
+import { logActivity } from "@/lib/activity";
 
 const GenerateRequestSchema = z.object({
   domainId: z.string().min(1),
@@ -76,6 +77,10 @@ export async function POST(request: Request) {
         status: "DRAFT",
       },
       include: { domain: true, template: true },
+    });
+
+    logActivity("doc_generate", `Sinh tài liệu "${title}" cho domain "${domain.name}"`, {
+      metadata: { documentId: document.id, domainId, templateId, modelUsed, cost },
     });
 
     return NextResponse.json(

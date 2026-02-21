@@ -1,11 +1,18 @@
 import { NextResponse } from "next/server";
+import { z } from "zod/v4";
 import { db } from "@/lib/db";
+
+const ActivityQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
+});
 
 // GET /api/activity?limit=20 — Recent activity feed
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const limit = Math.min(Number(searchParams.get("limit") ?? 20), 100);
+    const { limit } = ActivityQuerySchema.parse({
+      limit: searchParams.get("limit") ?? undefined,
+    });
 
     const activities = await db.activityLog.findMany({
       take: limit,
@@ -26,6 +33,12 @@ export async function GET(request: Request) {
 
     return NextResponse.json(serialized);
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Invalid query parameters", details: error.issues },
+        { status: 400 }
+      );
+    }
     const message = error instanceof Error ? error.message : "Database error";
     return NextResponse.json({ error: message }, { status: 500 });
   }

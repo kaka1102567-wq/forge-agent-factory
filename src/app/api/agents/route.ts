@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod/v4";
 import { db } from "@/lib/db";
 import { CreateAgentSchema } from "@/lib/schemas/agent-config";
+import { logActivity } from "@/lib/activity";
 
 export async function GET() {
   try {
@@ -41,6 +42,11 @@ export async function POST(request: Request) {
         config: data.config,
       },
       include: { domain: true },
+    });
+
+    logActivity("agent_create", `Tạo agent "${agent.name}" cho domain "${agent.domain.name}"`, {
+      agentId: agent.id,
+      metadata: { domainId: data.domainId, archetype: data.archetype },
     });
 
     return NextResponse.json(agent, { status: 201 });

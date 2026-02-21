@@ -7,6 +7,7 @@ import {
   AGENT_ASSEMBLE_PROMPT,
   type AgentAssembleInput,
 } from "@/lib/ai/prompts/agent-assemble";
+import { logActivity } from "@/lib/activity";
 
 export async function POST(request: Request) {
   try {
@@ -72,6 +73,10 @@ export async function POST(request: Request) {
       if (match) jsonText = match[0];
     }
     const parsed = JSON.parse(jsonText);
+
+    logActivity("agent_assemble", `Lắp ráp agent cho domain "${domain.name}" (${documents.length} tài liệu)`, {
+      metadata: { domainId: data.domainId, archetype, modelUsed: result.modelUsed, cost: result.cost },
+    });
 
     return NextResponse.json({
       agent: {

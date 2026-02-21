@@ -38,21 +38,21 @@ export const QUICK_DOC_GENERATE_PROMPT = {
 Sinh ĐÚNG 3 tài liệu sau:
 
 1. **Knowledge Base** (category: "knowledge")
-   - Thông tin sản phẩm/dịch vụ của doanh nghiệp
-   - Quy trình hoạt động, chính sách
-   - Thông tin liên hệ, giờ làm việc
-   - Bảng giá, gói dịch vụ (nếu phù hợp)
+   - Domain knowledge cốt lõi agent cần nắm vững
+   - Quy trình, framework, methodology của lĩnh vực
+   - Data points, metrics, KPIs quan trọng
+   - Stakeholders, resources, constraints
 
 2. **Behavior Guide** (category: "behavior")
-   - Quy tắc hội thoại: greeting, goodbye, chuyển topic
+   - Phong cách ra quyết định và tư duy chiến lược
    - Tone & personality: cách xưng hô, mức độ formal
    - Quy tắc escalation: khi nào chuyển sang người thật
-   - Format trả lời: độ dài, ngôn ngữ, emoji
+   - Format output: báo cáo, phân tích, đề xuất
 
-3. **FAQ & Objection Handling** (category: "faq")
-   - 8-12 câu hỏi thường gặp + câu trả lời mẫu
-   - 4-6 phản đối phổ biến + cách xử lý
-   - Câu hỏi ngoài phạm vi + cách từ chối lịch sự
+3. **Scenarios & Decision Framework** (category: "faq")
+   - 8-12 tình huống phổ biến + cách agent xử lý
+   - 4-6 edge cases + framework ra quyết định
+   - Tình huống ngoài phạm vi + cách từ chối và escalate
 
 Yêu cầu:
 - Nội dung phải CỤ THỂ cho ngành và chức năng (không generic)

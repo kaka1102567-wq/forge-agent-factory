@@ -151,7 +151,7 @@ export function AgentConfigPanel({
             disabled={disabled}
             rows={3}
             className="text-xs"
-            placeholder="VD: yêu cầu hoàn tiền, khiếu nại..."
+            placeholder="VD: quyết định ngân sách >50M, hợp đồng pháp lý, khủng hoảng truyền thông..."
           />
         </div>
 

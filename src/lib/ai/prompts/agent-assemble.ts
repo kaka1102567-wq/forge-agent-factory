@@ -45,7 +45,7 @@ System prompt PHẢI có đúng 4 sections với headers markdown ## :
 
 ## KNOWLEDGE
 - Tổng hợp domain knowledge từ tất cả tài liệu nguồn
-- FAQ, quy trình, sản phẩm/dịch vụ
+- Framework, quy trình, data points, methodology
 
 ## BEHAVIOR
 - Quy tắc trả lời: format, độ dài, ngôn ngữ

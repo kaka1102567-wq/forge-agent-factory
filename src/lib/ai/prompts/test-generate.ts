@@ -34,11 +34,11 @@ function getRoundInstructions(round: RoundNumber): string {
     case 1:
       return `VÒNG 1 — FUNCTIONAL (Chức năng cơ bản)
 Sinh ${TEST_ROUNDS[1].count} test cases kiểm tra chức năng chính:
-- Chào hỏi, giới thiệu bản thân
-- Trả lời FAQ phổ biến của ngành
+- Giới thiệu vai trò và phạm vi năng lực
+- Phân tích tình huống và đưa ra khuyến nghị
 - Xử lý yêu cầu chính (theo archetype)
-- Đưa ra thông tin sản phẩm/dịch vụ
-- Follow-up và đóng hội thoại
+- Ra quyết định dựa trên domain knowledge
+- Follow-up và tổng kết action items
 Mỗi case có category = "functional".`;
 
     case 2:
@@ -57,10 +57,10 @@ Mỗi case có category = "edge_case".`;
       return `VÒNG 3 — BENCHMARK (So sánh chất lượng)
 Sinh ${TEST_ROUNDS[3].count} test cases benchmark:
 - Câu hỏi phức tạp cần reasoning nhiều bước
-- So sánh sản phẩm/dịch vụ
-- Tình huống cần tư vấn chuyên sâu
-- Xử lý phàn nàn phức tạp
-- Upsell/cross-sell tự nhiên
+- Phân tích data và đề xuất chiến lược
+- Tình huống cần ra quyết định với nhiều biến số
+- Xử lý tình huống khẩn cấp / escalation phức tạp
+- Đề xuất giải pháp chủ động (proactive recommendation)
 Mỗi case có category = "benchmark".`;
 
     case 4:

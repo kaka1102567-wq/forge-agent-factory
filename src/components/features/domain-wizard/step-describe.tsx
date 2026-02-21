@@ -78,7 +78,7 @@ export function StepDescribe({
           </Label>
           <Textarea
             id="description"
-            placeholder="Ví dụ: Công ty bán lẻ thời trang online, phục vụ khách hàng nữ 18-35 tuổi. Cần agent hỗ trợ tư vấn size, chất liệu và xử lý đổi trả..."
+            placeholder="Ví dụ: Xổ Số 10K — nền tảng xổ số online. Cần Marketing Director agent lên chiến lược, phân tích đối thủ, đề xuất campaign. Hoặc: Startup SaaS cần Sales Agent tự qualify leads, demo sản phẩm, follow up pipeline..."
             className="min-h-32"
             value={data.description}
             onChange={(e) =>
@@ -94,7 +94,7 @@ export function StepDescribe({
             <Label htmlFor="companyName">Tên công ty</Label>
             <Input
               id="companyName"
-              placeholder="VD: Thời Trang ABC"
+              placeholder="VD: Xổ Số 10K"
               value={data.companyName}
               onChange={(e) =>
                 onChange({ ...data, companyName: e.target.value })

@@ -81,31 +81,31 @@ Ban la {{agent_role}}, lam viec cho {{company_name}} trong linh vuc {{industry}}
     type: "response",
     content: `# Knowledge Base - {{company_name}}
 
-## Thong tin cong ty
+## Thong tin to chuc
 - Ten: {{company_name}}
 - Nganh: {{industry}}
 - Chuc nang chinh: {{function}}
 
-[AI_FILL: Mo ta chi tiet ve cong ty, su menh, gia tri cot loi]
+[AI_FILL: Mo ta chi tiet ve to chuc, su menh, gia tri cot loi]
 
-## San pham / Dich vu
-[AI_FILL: Danh sach va mo ta chi tiet san pham/dich vu]
+## Domain Knowledge
+[AI_FILL: Kien thuc cot loi agent can nam vung — framework, methodology, quy trinh nghiep vu]
 
-## FAQ - Cau hoi thuong gap
-[AI_FILL: 15-20 cau hoi thuong gap va cau tra loi mau]
+## Tinh huong thuong gap
+[AI_FILL: 15-20 tinh huong pho bien agent can xu ly va cach tiep can]
 
-## Chinh sach
-### Chinh sach doi tra
-[AI_FILL: Chinh sach doi tra hang]
+## Quy trinh & Chinh sach
+### Quy trinh ra quyet dinh
+[AI_FILL: Framework ra quyet dinh, tieu chi danh gia]
 
-### Chinh sach bao hanh
-[AI_FILL: Chinh sach bao hanh]
+### Quy trinh escalation
+[AI_FILL: Khi nao can chuyen cho nguoi that, quy trinh ban giao]
 
-### Chinh sach giao hang
-[AI_FILL: Chinh sach giao hang va thoi gian]
+### Rang buoc & Gioi han
+[AI_FILL: Nhung rang buoc ve ngan sach, thoi gian, pham vi quyen han]
 
-## Thong tin lien he
-[AI_FILL: Cac kenh lien he, gio lam viec, dia chi]`,
+## Resources & Stakeholders
+[AI_FILL: Cac nguon luc, doi tac, kenh lien lac noi bo]`,
     variables: {
       company_name: "Ten cong ty",
       industry: "Nganh nghe",

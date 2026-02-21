@@ -47,7 +47,7 @@ export function StepDescribe({ onSubmit }: StepDescribeProps) {
             Mô tả doanh nghiệp / sản phẩm
           </label>
           <Textarea
-            placeholder="Ví dụ: Cửa hàng bán điện thoại online, chuyên iPhone và Samsung. Hỗ trợ trả góp 0%, giao hàng toàn quốc. Khách hàng chủ yếu là giới trẻ 18-35 tuổi..."
+            placeholder="Ví dụ: Agency marketing 50 nhân sự, chuyên chạy ads Facebook/Google. Cần Sales Agent tự qualify leads từ form, gửi proposal, follow up đến closing. Hoặc: Chuỗi F&B 20 chi nhánh cần Operations Agent giám sát inventory, đề xuất order, phân tích doanh thu..."
             rows={6}
             value={description}
             onChange={(e) => setDescription(e.target.value)}

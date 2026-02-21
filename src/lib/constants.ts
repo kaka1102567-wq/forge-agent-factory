@@ -73,6 +73,12 @@ export const QUALITY_THRESHOLDS = {
   EXCELLENT: 90,
 } as const;
 
+// Document version history
+export const MAX_VERSION_HISTORY = 10;
+
+// Auto-save interval (30 giây)
+export const AUTO_SAVE_INTERVAL_MS = 30_000;
+
 // Navigation items for dashboard sidebar
 export const NAV_ITEMS = [
   { label: "Dashboard", href: "/", icon: "LayoutDashboard" },

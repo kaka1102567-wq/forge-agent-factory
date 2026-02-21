@@ -1,14 +1,17 @@
+import pg from "pg";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@/generated/prisma/client";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-// Prisma v7 requires adapter or accelerateUrl — lazy init để tránh crash lúc build
-// Runtime sẽ hoạt động khi có DATABASE_URL + adapter đúng
+// Prisma v7 — dùng PG adapter để kết nối trực tiếp DB
 function createPrismaClient(): PrismaClient {
+  const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
+  const adapter = new PrismaPg(pool);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return new (PrismaClient as any)() as PrismaClient;
+  return new (PrismaClient as any)({ adapter }) as PrismaClient;
 }
 
 // Lazy singleton — chỉ tạo PrismaClient khi thực sự dùng

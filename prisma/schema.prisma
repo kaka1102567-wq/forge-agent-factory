@@ -61,6 +61,7 @@ model Template {
 
   documents Document[]
 
+  @@unique([name])
   @@map("templates")
 }
 
@@ -70,9 +71,11 @@ model Document {
   templateId   String?
   title        String
   content      String         @db.Text
-  qualityScore Float?         // Điểm chất lượng từ AI scoring (0-100)
-  status       DocumentStatus @default(DRAFT)
-  version      Int            @default(1)
+  qualityScore  Float?         // Điểm chất lượng từ AI scoring (0-100)
+  qualityDetail Json?          // Chi tiết chấm điểm: relevance, completeness, clarity, tone, suggestions
+  status        DocumentStatus @default(DRAFT)
+  version       Int            @default(1)
+  versionHistory Json          @default("[]") // Array of {version, content, savedAt}, max 10
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
 

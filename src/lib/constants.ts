@@ -79,6 +79,9 @@ export const MAX_VERSION_HISTORY = 10;
 // Auto-save interval (30 giây)
 export const AUTO_SAVE_INTERVAL_MS = 30_000;
 
+// Chat preview giới hạn số lượt gửi
+export const CHAT_PREVIEW_MAX_MESSAGES = 10;
+
 // Navigation items for dashboard sidebar
 export const NAV_ITEMS = [
   { label: "Dashboard", href: "/", icon: "LayoutDashboard" },

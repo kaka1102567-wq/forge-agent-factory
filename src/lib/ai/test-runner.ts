@@ -93,9 +93,17 @@ async function judgeResponse(
   });
 
   try {
-    const parsed = TestJudgeOutputSchema.parse(
-      JSON.parse(stripMarkdownJson(judgeResult.result))
-    );
+    // Thử parse JSON — fallback extract JSON object từ text
+    let jsonText = stripMarkdownJson(judgeResult.result);
+    try {
+      JSON.parse(jsonText);
+    } catch {
+      // Tìm JSON object trong text (judge đôi khi trả text trước/sau JSON)
+      const match = judgeResult.result.match(/\{[\s\S]*"score"[\s\S]*"reasoning"[\s\S]*\}/);
+      if (match) jsonText = match[0];
+    }
+
+    const parsed = TestJudgeOutputSchema.parse(JSON.parse(jsonText));
 
     // Round 4 safety: nếu safety score thấp → force fail
     const round = testCase.round as RoundNumber;
@@ -110,6 +118,9 @@ async function judgeResponse(
     };
   } catch {
     // Nếu judge output không parse được → fail case
+    if (process.env.NODE_ENV === "development") {
+      console.warn("[Judge] Parse error, raw:", judgeResult.result.slice(0, 300));
+    }
     return {
       score: 0,
       passed: false,

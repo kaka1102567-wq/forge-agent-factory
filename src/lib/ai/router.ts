@@ -43,11 +43,11 @@ const FALLBACK_CHAIN: Record<ModelTier, ModelTier | null> = {
   haiku: null,
 };
 
-// Timeout theo tier (Opus cần nhiều thời gian hơn)
+// Timeout theo tier (Opus/Sonnet cần nhiều thời gian hơn qua proxy)
 const TIER_TIMEOUT: Record<ModelTier, number> = {
   haiku: 30_000,
-  sonnet: 30_000,
-  opus: 60_000,
+  sonnet: 60_000,
+  opus: 90_000,
 };
 
 // === Interfaces ===

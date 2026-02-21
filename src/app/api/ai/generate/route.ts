@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod/v4";
 import { db } from "@/lib/db";
 import { routeTask } from "@/lib/ai/router";
+import { stripMarkdownJson } from "@/lib/ai/client";
 import {
   DOC_GENERATE_PROMPT,
   DocGenerateOutputSchema,
@@ -56,7 +57,7 @@ export async function POST(request: Request) {
     // Parse + validate AI response
     let parsed;
     try {
-      parsed = DocGenerateOutputSchema.parse(JSON.parse(result));
+      parsed = DocGenerateOutputSchema.parse(JSON.parse(stripMarkdownJson(result)));
     } catch {
       // Fallback nếu AI trả format khác
       parsed = { title: `${template.name} - ${domain.name}`, content: result, sections: [] };

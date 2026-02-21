@@ -16,11 +16,11 @@ export type TaskType =
   | "review"
   | "test_judge";
 
-// Model IDs
+// Model IDs — Claudible proxy format
 export const MODEL_MAP: Record<ModelTier, string> = {
-  haiku: "claude-haiku-4-5-20251001",
-  sonnet: "claude-sonnet-4-6-20250514",
-  opus: "claude-opus-4-6-20250514",
+  haiku: "claude-haiku-4.5",
+  sonnet: "claude-sonnet-4.6",
+  opus: "claude-opus-4.6",
 };
 
 // Routing rules: task → model tier phù hợp

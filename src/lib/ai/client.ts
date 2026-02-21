@@ -1,5 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
-import type { MessageCreateParamsNonStreaming } from "@anthropic-ai/sdk/resources/messages";
+import OpenAI from "openai";
 
 // Error types cho AI requests
 export type AIErrorType =
@@ -21,9 +20,9 @@ export class AIError extends Error {
   }
 }
 
-// Phân loại lỗi từ Anthropic API
+// Phân loại lỗi từ OpenAI-compatible API
 export function classifyError(error: unknown): AIError {
-  if (error instanceof Anthropic.APIError) {
+  if (error instanceof OpenAI.APIError) {
     const status = error.status;
 
     if (status === 429) {
@@ -43,7 +42,7 @@ export function classifyError(error: unknown): AIError {
       error.message,
       "unknown",
       status,
-      status >= 500
+      status !== undefined && status >= 500
     );
   }
 
@@ -51,19 +50,22 @@ export function classifyError(error: unknown): AIError {
   return new AIError(msg, "unknown", undefined, false);
 }
 
-// Singleton Anthropic client
-const globalForAnthropic = globalThis as unknown as {
-  anthropic: Anthropic | undefined;
+// Singleton OpenAI client (trỏ tới proxy Claudible)
+const globalForOpenAI = globalThis as unknown as {
+  openaiClient: OpenAI | undefined;
 };
 
-export const anthropic =
-  globalForAnthropic.anthropic ??
-  new Anthropic({
+export const openaiClient =
+  globalForOpenAI.openaiClient ??
+  new OpenAI({
     apiKey: process.env.ANTHROPIC_API_KEY,
+    baseURL: process.env.ANTHROPIC_BASE_URL
+      ? `${process.env.ANTHROPIC_BASE_URL}/v1`
+      : "https://api.anthropic.com/v1",
   });
 
 if (process.env.NODE_ENV !== "production")
-  globalForAnthropic.anthropic = anthropic;
+  globalForOpenAI.openaiClient = openaiClient;
 
 // Retry config
 const MAX_RETRIES = 3;
@@ -83,22 +85,65 @@ export interface SendMessageOptions {
   timeoutMs?: number;
 }
 
+// Params format tương thích — giữ interface cũ cho router/cost không cần đổi
+export interface SendMessageParams {
+  model: string;
+  max_tokens: number;
+  system?: string;
+  messages: Array<{ role: "user" | "assistant"; content: string }>;
+  temperature?: number;
+}
+
+// Response format tương thích — map từ OpenAI response sang Anthropic-like
+export interface SendMessageResponse {
+  content: Array<{ type: "text"; text: string }>;
+  usage: { input_tokens: number; output_tokens: number };
+}
+
 /**
- * Gửi message tới Anthropic API với retry + timeout.
- * Trả về raw response để caller xử lý.
+ * Gửi message qua OpenAI-compatible proxy với retry + timeout.
+ * Trả về response format tương thích Anthropic để router/cost không cần đổi.
  */
 export async function sendMessage(
-  params: MessageCreateParamsNonStreaming,
+  params: SendMessageParams,
   options?: SendMessageOptions
-) {
+): Promise<SendMessageResponse> {
   const timeoutMs = options?.timeoutMs ?? 30000;
+
+  // Build OpenAI messages format: system message + user/assistant messages
+  const messages: OpenAI.ChatCompletionMessageParam[] = [];
+  if (params.system) {
+    messages.push({ role: "system", content: params.system });
+  }
+  for (const msg of params.messages) {
+    messages.push({ role: msg.role, content: msg.content });
+  }
 
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
-      const response = await anthropic.messages.create(params, {
-        timeout: timeoutMs,
-      });
-      return response;
+      const response = await openaiClient.chat.completions.create(
+        {
+          model: params.model,
+          max_tokens: params.max_tokens,
+          messages,
+          ...(params.temperature !== undefined
+            ? { temperature: params.temperature }
+            : {}),
+        },
+        { timeout: timeoutMs }
+      );
+
+      // Map OpenAI response → Anthropic-compatible format
+      const text = response.choices[0]?.message?.content ?? "";
+      const usage = response.usage;
+
+      return {
+        content: [{ type: "text", text }],
+        usage: {
+          input_tokens: usage?.prompt_tokens ?? 0,
+          output_tokens: usage?.completion_tokens ?? 0,
+        },
+      };
     } catch (error) {
       const aiError = classifyError(error);
 
@@ -120,4 +165,20 @@ export async function sendMessage(
 
   // Unreachable, nhưng TypeScript cần
   throw new AIError("Max retries exceeded", "unknown", undefined, false);
+}
+
+/**
+ * Strip markdown code block wrapper (```json ... ```) từ AI response.
+ * Proxy qua OpenAI-compatible endpoint thường trả JSON bọc markdown.
+ */
+export function stripMarkdownJson(text: string): string {
+  const trimmed = text.trim();
+  if (trimmed.startsWith("```")) {
+    // Bỏ dòng đầu (```json hoặc ```) và dòng cuối (```)
+    const lines = trimmed.split("\n");
+    const start = lines[0].startsWith("```") ? 1 : 0;
+    const end = lines[lines.length - 1].trim() === "```" ? lines.length - 1 : lines.length;
+    return lines.slice(start, end).join("\n").trim();
+  }
+  return trimmed;
 }

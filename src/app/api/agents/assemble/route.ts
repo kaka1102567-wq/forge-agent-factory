@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { AssembleRequestSchema } from "@/lib/schemas/agent-config";
 import { routeTask } from "@/lib/ai/router";
+import { stripMarkdownJson } from "@/lib/ai/client";
 import {
   AGENT_ASSEMBLE_PROMPT,
   type AgentAssembleInput,
@@ -63,7 +64,7 @@ export async function POST(request: Request) {
     });
 
     // Parse JSON response từ AI
-    const parsed = JSON.parse(result.result);
+    const parsed = JSON.parse(stripMarkdownJson(result.result));
 
     return NextResponse.json({
       agent: {

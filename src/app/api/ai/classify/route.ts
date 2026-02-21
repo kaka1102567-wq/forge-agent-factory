@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod/v4";
 import { routeTask } from "@/lib/ai/router";
+import { stripMarkdownJson } from "@/lib/ai/client";
 import {
   DOMAIN_CLASSIFY_PROMPT,
   DomainClassifyInputSchema,
@@ -23,7 +24,7 @@ export async function POST(request: Request) {
     );
 
     // Validate AI output
-    const classification = DomainClassifyOutputSchema.parse(JSON.parse(result));
+    const classification = DomainClassifyOutputSchema.parse(JSON.parse(stripMarkdownJson(result)));
 
     return NextResponse.json({
       classification,

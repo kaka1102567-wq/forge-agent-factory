@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod/v4";
 import { db } from "@/lib/db";
 import { routeTask } from "@/lib/ai/router";
+import { stripMarkdownJson } from "@/lib/ai/client";
 import {
   QUALITY_SCORE_PROMPT,
   QualityScoreOutputSchema,
@@ -45,7 +46,7 @@ export async function POST(request: Request) {
     // Parse + validate output
     let scoreData: QualityScoreOutput;
     try {
-      scoreData = QualityScoreOutputSchema.parse(JSON.parse(result));
+      scoreData = QualityScoreOutputSchema.parse(JSON.parse(stripMarkdownJson(result)));
     } catch {
       return NextResponse.json(
         { error: "AI returned invalid score format" },

@@ -76,7 +76,7 @@ src/
 Domain → Documents (generated via AI) → Agent Assembly → Test → Deploy
 
 ### Database Models (Prisma)
-6 models: Domain, Template, Document, Agent, TestCase, TestResult.
+8 models: Domain, Template, Document, Agent, TestCase, TestResult, CostLog, ActivityLog.
 Schema at `prisma/schema.prisma`. Config at `prisma.config.ts` (Prisma 7 style - DB URL in config, NOT in schema).
 
 ## Key Patterns
@@ -123,4 +123,4 @@ Zod for all API input validation. Validate at route handler level before DB oper
 - ESLint config `core-web-vitals` import path cần fix cho eslint-config-next mới
 
 ## Current Sprint
-Phase 2 - Week 1: Deployment Pipeline (WP-06)
+Phase 2 - Week 2: Dashboard & Monitoring Hub (WP-07)

@@ -115,10 +115,12 @@ model Agent {
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
 
-  domain      Domain       @relation(fields: [domainId], references: [id], onDelete: Cascade)
-  testCases   TestCase[]
-  testResults TestResult[]
-  deployments Deployment[]
+  domain       Domain        @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  testCases    TestCase[]
+  testResults  TestResult[]
+  deployments  Deployment[]
+  costLogs     CostLog[]
+  activityLogs ActivityLog[]
 
   @@map("agents")
 }
@@ -174,4 +176,36 @@ model Deployment {
 
   @@unique([agentId, channel])
   @@map("deployments")
+}
+
+model CostLog {
+  id           String   @id @default(cuid())
+  agentId      String?
+  model        String   // haiku, sonnet, opus
+  task         String   // TaskType: classify, generate, assemble...
+  inputTokens  Int
+  outputTokens Int
+  cost         Float    // USD
+  createdAt    DateTime @default(now())
+
+  agent Agent? @relation(fields: [agentId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([agentId])
+  @@map("cost_logs")
+}
+
+model ActivityLog {
+  id          String   @id @default(cuid())
+  type        String   // deploy, test_run, quality_score, status_change...
+  agentId     String?
+  description String
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  agent Agent? @relation(fields: [agentId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([agentId])
+  @@map("activity_logs")
 }

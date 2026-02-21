@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod/v4";
 import { db } from "@/lib/db";
+import { logActivity } from "@/lib/activity";
 import { routeTask } from "@/lib/ai/router";
 import { stripMarkdownJson } from "@/lib/ai/client";
 import {
@@ -61,6 +62,10 @@ export async function POST(request: Request) {
         qualityScore: scoreData.score,
         qualityDetail: scoreData,
       },
+    });
+
+    logActivity("quality_score", `Chấm điểm document "${document.title}": ${scoreData.score}/100`, {
+      metadata: { documentId, score: scoreData.score, modelUsed, cost },
     });
 
     return NextResponse.json({

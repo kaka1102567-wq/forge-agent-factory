@@ -1,5 +1,6 @@
 import { z } from "zod/v4";
 import { db } from "@/lib/db";
+import { logActivity } from "@/lib/activity";
 import {
   executeTestCase,
   type AgentData,
@@ -81,6 +82,11 @@ export async function POST(
   await db.agent.update({
     where: { id: agentId },
     data: { status: "TESTING" },
+  });
+
+  logActivity("test_run", `Bắt đầu chạy test cho agent "${agent.name}"`, {
+    agentId,
+    metadata: { rounds: roundsToRun, totalCases: testCases.length },
   });
 
   // SSE stream

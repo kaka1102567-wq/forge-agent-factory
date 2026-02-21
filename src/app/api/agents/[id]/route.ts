@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod/v4";
 import { db } from "@/lib/db";
+import { logActivity } from "@/lib/activity";
 import { AgentConfigSchema } from "@/lib/schemas/agent-config";
 
 const UpdateAgentSchema = z.object({
@@ -53,6 +54,13 @@ export async function PATCH(
       data: updateData,
       include: { domain: true },
     });
+
+    if (data.status) {
+      logActivity("status_change", `Agent "${agent.name}" → ${data.status}`, {
+        agentId: id,
+        metadata: { newStatus: data.status },
+      });
+    }
 
     return NextResponse.json(agent);
   } catch (error) {

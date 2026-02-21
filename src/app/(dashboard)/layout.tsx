@@ -6,6 +6,7 @@ import {
   Bot,
   FlaskConical,
   Rocket,
+  DollarSign,
 } from "lucide-react";
 
 const navItems = [
@@ -15,6 +16,7 @@ const navItems = [
   { label: "Agents", href: "/agents", icon: Bot },
   { label: "Tests", href: "/tests", icon: FlaskConical },
   { label: "Deploy", href: "/deploy", icon: Rocket },
+  { label: "Costs", href: "/costs", icon: DollarSign },
 ];
 
 export default function DashboardLayout({

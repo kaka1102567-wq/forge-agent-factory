@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod/v4";
 import { db } from "@/lib/db";
+import { logActivity } from "@/lib/activity";
 
 const RollbackSchema = z.object({
   agentId: z.string().min(1),
@@ -57,6 +58,11 @@ export async function POST(request: Request) {
         data: { status: "ACTIVE" },
       });
     }
+
+    logActivity("rollback", `Rollback deployment ${channel}`, {
+      agentId,
+      metadata: { channel },
+    });
 
     return NextResponse.json(updated);
   } catch (error) {

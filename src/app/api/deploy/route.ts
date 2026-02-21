@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod/v4";
 import { db } from "@/lib/db";
+import { logActivity } from "@/lib/activity";
 import type { Prisma } from "@/generated/prisma/client";
 
 const DeploySchema = z.object({
@@ -67,6 +68,11 @@ export async function POST(request: Request) {
     await db.agent.update({
       where: { id: agentId },
       data: { status: "DEPLOYED" },
+    });
+
+    logActivity("deploy", `Deploy agent lên kênh ${channel}`, {
+      agentId,
+      metadata: { channel, deploymentId: deployment.id },
     });
 
     return NextResponse.json(deployment, { status: 201 });

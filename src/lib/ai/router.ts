@@ -1,5 +1,6 @@
 import { sendMessage, classifyError, AIError } from "./client";
 import { calculateCost, logRequest } from "./cost";
+import { db } from "@/lib/db";
 
 // === Types ===
 
@@ -58,6 +59,8 @@ export interface RouteTaskOptions {
   temperature?: number;
   /** Override tier thay vì dùng routing rules */
   tierOverride?: ModelTier;
+  /** Agent ID để ghi CostLog vào DB */
+  agentId?: string;
 }
 
 export interface RouteTaskResult {
@@ -95,7 +98,7 @@ export async function routeTask(
   input: string,
   options?: RouteTaskOptions
 ): Promise<RouteTaskResult> {
-  const { system, maxTokens = 4096, temperature, tierOverride } = options ?? {};
+  const { system, maxTokens = 4096, temperature, tierOverride, agentId } = options ?? {};
 
   let currentTier = tierOverride ?? getModelForTask(task);
 
@@ -124,7 +127,7 @@ export async function routeTask(
       const textContent = response.content.find((c) => c.type === "text");
       const result = textContent?.text ?? "";
 
-      // Log chi phí
+      // Log chi phí (in-memory)
       logRequest({
         model: currentTier,
         inputTokens,
@@ -133,6 +136,22 @@ export async function routeTask(
         timestamp: new Date(),
         taskType: task,
       });
+
+      // Lưu CostLog vào DB (fire-and-forget, không block response)
+      db.costLog
+        .create({
+          data: {
+            agentId: agentId ?? null,
+            model: currentTier,
+            task,
+            inputTokens,
+            outputTokens,
+            cost,
+          },
+        })
+        .catch((err: unknown) => {
+          console.error("[CostLog] Failed to save:", err);
+        });
 
       if (process.env.NODE_ENV === "development") {
         console.log(

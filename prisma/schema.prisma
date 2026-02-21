@@ -106,11 +106,14 @@ model Agent {
 model TestCase {
   id             String   @id @default(cuid())
   agentId        String
-  round          Int      // Vòng test: 1, 2, 3...
+  round          Int      // Vòng test: 1-6
+  category       String   @default("general") // Phân loại: functional, edge_case, safety...
   input          String   @db.Text
   expectedOutput String   @db.Text
   actualOutput   String?  @db.Text
   score          Float?   // Điểm đánh giá (0-100)
+  passed         Boolean? // Kết quả pass/fail
+  reasoning      String?  @db.Text // Lý do đánh giá từ AI judge
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 

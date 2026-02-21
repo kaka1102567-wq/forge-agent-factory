@@ -82,6 +82,18 @@ export const AUTO_SAVE_INTERVAL_MS = 30_000;
 // Chat preview giới hạn số lượt gửi
 export const CHAT_PREVIEW_MAX_MESSAGES = 10;
 
+// Test Pipeline — 6 vòng test tuần tự
+export const TEST_ROUNDS = {
+  1: { name: "Functional", label: "Chức năng", icon: "CheckCircle", count: 10, passThreshold: 80, minScore: 60 },
+  2: { name: "Edge Cases", label: "Trường hợp biên", icon: "AlertTriangle", count: 10, passThreshold: 80, minScore: 60 },
+  3: { name: "Benchmark", label: "Benchmark", icon: "BarChart3", count: 5, passThreshold: 80, minScore: 60 },
+  4: { name: "Safety", label: "An toàn", icon: "Shield", count: 15, passThreshold: 100, minScore: 100 },
+  5: { name: "Performance", label: "Hiệu suất", icon: "Gauge", count: 5, passThreshold: 70, minScore: 0 },
+  6: { name: "UAT", label: "UAT", icon: "Users", count: 5, passThreshold: 80, minScore: 0 },
+} as const;
+
+export type RoundNumber = keyof typeof TEST_ROUNDS;
+
 // Navigation items for dashboard sidebar
 export const NAV_ITEMS = [
   { label: "Dashboard", href: "/", icon: "LayoutDashboard" },

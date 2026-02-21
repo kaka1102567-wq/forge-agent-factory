@@ -1,10 +1,14 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const agentId = request.nextUrl.searchParams.get("agentId");
+
   const results = await db.testResult.findMany({
+    where: agentId ? { agentId } : undefined,
     orderBy: { createdAt: "desc" },
-    include: { agent: true },
+    include: { agent: { include: { domain: true } } },
   });
+
   return NextResponse.json(results);
 }

@@ -1,0 +1,136 @@
+import { NextResponse } from "next/server";
+import { z } from "zod/v4";
+import { db } from "@/lib/db";
+import { routeTask } from "@/lib/ai/router";
+import { stripMarkdownJson } from "@/lib/ai/client";
+import {
+  TEST_GENERATE_PROMPT,
+  TestGenerateOutputSchema,
+} from "@/lib/ai/prompts/test-generate";
+import { SAFETY_TEST_CASES } from "@/lib/ai/safety-tests";
+import { TEST_ROUNDS, type RoundNumber } from "@/lib/constants";
+
+const RequestSchema = z.object({
+  agentId: z.string().min(1),
+  rounds: z.array(z.number().min(1).max(6)).optional(),
+});
+
+// Sinh test cases cho agent theo rounds
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    const { agentId, rounds: requestedRounds } = RequestSchema.parse(body);
+
+    // Fetch agent + domain + documents
+    const agent = await db.agent.findUnique({
+      where: { id: agentId },
+      include: {
+        domain: {
+          include: { documents: { where: { status: "APPROVED" } } },
+        },
+      },
+    });
+
+    if (!agent) {
+      return NextResponse.json({ error: "Agent not found" }, { status: 404 });
+    }
+
+    const domain = agent.domain;
+    const rounds = requestedRounds ?? [1, 2, 3, 4, 5, 6];
+    const allTestCases: Array<{
+      agentId: string;
+      round: number;
+      category: string;
+      input: string;
+      expectedOutput: string;
+    }> = [];
+
+    // Sinh test cases cho từng round
+    for (const round of rounds) {
+      const roundNum = round as RoundNumber;
+
+      // Round 4: merge safety dataset tĩnh
+      if (roundNum === 4) {
+        // Thêm 50 safety test cases tĩnh (có thể nhiều hơn count config)
+        for (const safetyCase of SAFETY_TEST_CASES) {
+          allTestCases.push({
+            agentId,
+            round: 4,
+            category: safetyCase.category,
+            input: safetyCase.input,
+            expectedOutput: safetyCase.expectedBehavior,
+          });
+        }
+        continue;
+      }
+
+      // Các round khác: sinh bằng AI
+      const input = TEST_GENERATE_PROMPT.buildUserMessage({
+        agentName: agent.name,
+        archetype: agent.archetype,
+        systemPrompt: agent.systemPrompt,
+        domainName: domain.name,
+        industry: domain.industry,
+        function: domain.function,
+        tone: domain.tone,
+        documentSummaries: domain.documents.map(
+          (d) => `${d.title} (${d.qualityScore ?? "?"}pts)`
+        ),
+        round,
+      });
+
+      const { result } = await routeTask(TEST_GENERATE_PROMPT.task, input, {
+        system: TEST_GENERATE_PROMPT.system,
+        maxTokens: TEST_GENERATE_PROMPT.maxTokens,
+      });
+
+      const parsed = TestGenerateOutputSchema.parse(
+        JSON.parse(stripMarkdownJson(result))
+      );
+
+      // Giới hạn theo count config
+      const maxCount = TEST_ROUNDS[roundNum].count;
+      const cases = parsed.testCases.slice(0, maxCount);
+
+      for (const tc of cases) {
+        allTestCases.push({
+          agentId,
+          round,
+          category: tc.category,
+          input: tc.input,
+          expectedOutput: tc.expectedBehavior,
+        });
+      }
+    }
+
+    // Xóa test cases cũ của các round được yêu cầu
+    await db.testCase.deleteMany({
+      where: { agentId, round: { in: rounds } },
+    });
+
+    // Bulk create
+    const created = await db.testCase.createMany({ data: allTestCases });
+
+    // Fetch lại để trả về
+    const testCases = await db.testCase.findMany({
+      where: { agentId, round: { in: rounds } },
+      orderBy: [{ round: "asc" }, { createdAt: "asc" }],
+    });
+
+    return NextResponse.json({
+      count: created.count,
+      rounds: rounds.length,
+      testCases,
+    });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Validation failed", details: error.issues },
+        { status: 400 }
+      );
+    }
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("[test-generate]", error);
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}

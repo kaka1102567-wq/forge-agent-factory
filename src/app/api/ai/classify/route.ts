@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
+import { z } from "zod/v4";
 import { routeTask } from "@/lib/ai/router";
 import {
   DOMAIN_CLASSIFY_PROMPT,
   DomainClassifyInputSchema,
+  DomainClassifyOutputSchema,
 } from "@/lib/ai/prompts/domain-classify";
 
 // Phân loại domain/intent - dùng Haiku (nhanh, rẻ)
@@ -20,11 +22,20 @@ export async function POST(request: Request) {
       }
     );
 
+    // Validate AI output
+    const classification = DomainClassifyOutputSchema.parse(JSON.parse(result));
+
     return NextResponse.json({
-      classification: JSON.parse(result),
+      classification,
       meta: { modelUsed, cost, latencyMs },
     });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Validation failed", details: error.issues },
+        { status: 400 }
+      );
+    }
     const message = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json({ error: message }, { status: 500 });
   }

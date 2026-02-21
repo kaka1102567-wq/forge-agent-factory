@@ -6,6 +6,7 @@ import {
   QUALITY_SCORE_PROMPT,
   QualityScoreOutputSchema,
   type QualityScoreInput,
+  type QualityScoreOutput,
 } from "@/lib/ai/prompts/quality-score";
 
 const ScoreRequestSchema = z.object({
@@ -42,8 +43,15 @@ export async function POST(request: Request) {
     );
 
     // Parse + validate output
-    const parsed = JSON.parse(result);
-    const scoreData = QualityScoreOutputSchema.parse(parsed);
+    let scoreData: QualityScoreOutput;
+    try {
+      scoreData = QualityScoreOutputSchema.parse(JSON.parse(result));
+    } catch {
+      return NextResponse.json(
+        { error: "AI returned invalid score format" },
+        { status: 502 }
+      );
+    }
 
     // Update document với score mới
     await db.document.update({
@@ -59,6 +67,12 @@ export async function POST(request: Request) {
       meta: { modelUsed, cost, latencyMs },
     });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Validation failed", details: error.issues },
+        { status: 400 }
+      );
+    }
     const message = error instanceof Error ? error.message : "Unknown error";
     const status = message.includes("not found") ? 404 : 500;
     return NextResponse.json({ error: message }, { status });

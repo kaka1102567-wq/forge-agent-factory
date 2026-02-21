@@ -37,7 +37,7 @@ interface VersionEntry {
   savedAt: string;
 }
 
-interface DocumentData {
+export interface DocumentData {
   id: string;
   title: string;
   content: string;
@@ -78,7 +78,7 @@ export function DocStudioEditor({ document: doc }: DocStudioEditorProps) {
   const [isSavingManual, setIsSavingManual] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
 
-  const { isSaving: isAutoSaving, isDirty, lastSavedAt } = useAutoSave({
+  const { isSaving: isAutoSaving, isDirty, lastSavedAt, errorCount: autoSaveErrors } = useAutoSave({
     documentId: doc.id,
     content,
   });
@@ -129,13 +129,26 @@ export function DocStudioEditor({ document: doc }: DocStudioEditorProps) {
     }
   }, [doc.id]);
 
-  // Khôi phục version cũ
+  // Khôi phục version cũ + persist về DB
   const handleRestore = useCallback(
     async (entry: VersionEntry) => {
       setContent(entry.content);
-      toast.success(`Da khoi phuc version ${entry.version}`);
+      try {
+        const res = await fetch(`/api/documents/${doc.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content: entry.content }),
+        });
+        if (!res.ok) throw new Error("Restore save failed");
+        const updated = await res.json();
+        setVersion(updated.version);
+        setVersionHistory(updated.versionHistory ?? []);
+        toast.success(`Da khoi phuc version ${entry.version}`);
+      } catch {
+        toast.error("Khoi phuc thanh cong nhung luu that bai");
+      }
     },
-    []
+    [doc.id]
   );
 
   return (
@@ -155,14 +168,16 @@ export function DocStudioEditor({ document: doc }: DocStudioEditorProps) {
 
         <div className="ml-auto flex items-center gap-2">
           {/* Save status */}
-          <span className="text-xs text-muted-foreground">
-            {isAutoSaving
-              ? "Dang luu..."
-              : isDirty
-                ? "Chua luu"
-                : lastSavedAt
-                  ? `Luu luc ${lastSavedAt.toLocaleTimeString("vi-VN")}`
-                  : ""}
+          <span className={`text-xs ${autoSaveErrors > 0 ? "text-destructive" : "text-muted-foreground"}`}>
+            {autoSaveErrors > 0
+              ? `Loi luu tu dong (${autoSaveErrors}x)`
+              : isAutoSaving
+                ? "Dang luu..."
+                : isDirty
+                  ? "Chua luu"
+                  : lastSavedAt
+                    ? `Luu luc ${lastSavedAt.toLocaleTimeString("vi-VN")}`
+                    : ""}
           </span>
 
           <Button

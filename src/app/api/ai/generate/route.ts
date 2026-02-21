@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 import { z } from "zod/v4";
 import { db } from "@/lib/db";
 import { routeTask } from "@/lib/ai/router";
-import { DOC_GENERATE_PROMPT, type DocGenerateInput } from "@/lib/ai/prompts/doc-generate";
+import {
+  DOC_GENERATE_PROMPT,
+  DocGenerateOutputSchema,
+  type DocGenerateInput,
+} from "@/lib/ai/prompts/doc-generate";
 
 const GenerateRequestSchema = z.object({
   domainId: z.string().min(1),
@@ -49,10 +53,17 @@ export async function POST(request: Request) {
       }
     );
 
-    // Parse AI response
-    const parsed = JSON.parse(result);
-    const content = parsed.content ?? "";
-    const title = parsed.title ?? `${template.name} - ${domain.name}`;
+    // Parse + validate AI response
+    let parsed;
+    try {
+      parsed = DocGenerateOutputSchema.parse(JSON.parse(result));
+    } catch {
+      // Fallback nếu AI trả format khác
+      parsed = { title: `${template.name} - ${domain.name}`, content: result, sections: [] };
+    }
+
+    const content = parsed.content;
+    const title = parsed.title || `${template.name} - ${domain.name}`;
 
     // Lưu document vào DB
     const document = await db.document.create({
@@ -66,11 +77,17 @@ export async function POST(request: Request) {
       include: { domain: true, template: true },
     });
 
-    return NextResponse.json({
-      document,
-      meta: { modelUsed, cost, latencyMs },
-    });
+    return NextResponse.json(
+      { document, meta: { modelUsed, cost, latencyMs } },
+      { status: 201 }
+    );
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Validation failed", details: error.issues },
+        { status: 400 }
+      );
+    }
     const message = error instanceof Error ? error.message : "Unknown error";
     const status = message.includes("not found") ? 404 : 500;
     return NextResponse.json({ error: message }, { status });

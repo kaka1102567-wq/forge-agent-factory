@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { DocStudioEditor } from "@/components/features/doc-studio/doc-studio-editor";
+import { DocStudioEditor, type DocumentData } from "@/components/features/doc-studio/doc-studio-editor";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -25,8 +25,8 @@ export default async function DocStudioPage({ params }: Props) {
     status: document.status,
     version: document.version,
     qualityScore: document.qualityScore,
-    qualityDetail: document.qualityDetail as any,
-    versionHistory: (document.versionHistory as any[]) ?? [],
+    qualityDetail: (document.qualityDetail ?? null) as unknown as DocumentData["qualityDetail"],
+    versionHistory: (document.versionHistory ?? []) as unknown as DocumentData["versionHistory"],
     domain: { id: document.domain.id, name: document.domain.name },
     template: document.template
       ? {

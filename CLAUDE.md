@@ -119,8 +119,8 @@ Zod for all API input validation. Validate at route handler level before DB oper
 - Use `sonner` for toast notifications (not deprecated `toast`)
 
 ## Known Issues
-- Prisma v7 PrismaClient cần adapter/accelerateUrl — `db.ts` dùng type assertion tạm, cần setup Prisma adapter đúng
+- Prisma v7 PrismaClient cần `@prisma/adapter-pg` — `db.ts` đã setup adapter pattern, seed.ts dùng `as any` cast do ESM/CJS type mismatch
 - ESLint config `core-web-vitals` import path cần fix cho eslint-config-next mới
 
 ## Current Sprint
-Phase 0 - Week 1: Project Setup + AI Router
+Phase 1 - Week 2: Document Generation Engine + Doc Studio (WP-03)

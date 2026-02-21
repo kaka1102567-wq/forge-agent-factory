@@ -13,6 +13,7 @@ export function useAutoSave({ documentId, content, enabled = true }: UseAutoSave
   const [isSaving, setIsSaving] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [isDirty, setIsDirty] = useState(false);
+  const [errorCount, setErrorCount] = useState(0);
   const lastSavedContentRef = useRef(content);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -38,9 +39,12 @@ export function useAutoSave({ documentId, content, enabled = true }: UseAutoSave
         lastSavedContentRef.current = content;
         setLastSavedAt(new Date());
         setIsDirty(false);
+        setErrorCount(0);
+      } else {
+        setErrorCount((c) => c + 1);
       }
     } catch {
-      // Silently fail — will retry on next interval
+      setErrorCount((c) => c + 1);
     } finally {
       setIsSaving(false);
     }
@@ -57,5 +61,5 @@ export function useAutoSave({ documentId, content, enabled = true }: UseAutoSave
     };
   }, [enabled, isDirty, save]);
 
-  return { isSaving, isDirty, lastSavedAt, save };
+  return { isSaving, isDirty, lastSavedAt, errorCount, save };
 }

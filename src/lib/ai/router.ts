@@ -1,4 +1,4 @@
-import { sendMessage, classifyError, type AIError } from "./client";
+import { sendMessage, classifyError, AIError } from "./client";
 import { calculateCost, logRequest } from "./cost";
 
 // === Types ===
@@ -143,8 +143,8 @@ export async function routeTask(
       return { result, modelUsed: currentTier, cost, latencyMs, inputTokens, outputTokens };
     } catch (error) {
       const aiError =
-        error instanceof Error && error.name === "AIError"
-          ? (error as AIError)
+        error instanceof AIError
+          ? error
           : classifyError(error);
 
       // Thử fallback nếu lỗi 529/500

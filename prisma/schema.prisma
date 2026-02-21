@@ -26,7 +26,26 @@ enum AgentStatus {
   DRAFT
   TESTING
   ACTIVE
+  DEPLOYED
   DISABLED
+}
+
+enum DeployChannel {
+  TELEGRAM
+  WEB
+}
+
+enum DeploymentStatus {
+  ACTIVE
+  ROLLED_BACK
+  STOPPED
+}
+
+enum HealthStatus {
+  HEALTHY
+  DEGRADED
+  DOWN
+  UNKNOWN
 }
 
 // === Models ===
@@ -99,6 +118,7 @@ model Agent {
   domain      Domain       @relation(fields: [domainId], references: [id], onDelete: Cascade)
   testCases   TestCase[]
   testResults TestResult[]
+  deployments Deployment[]
 
   @@map("agents")
 }
@@ -135,4 +155,23 @@ model TestResult {
   agent Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
 
   @@map("test_results")
+}
+
+model Deployment {
+  id                   String           @id @default(cuid())
+  agentId              String
+  channel              DeployChannel
+  status               DeploymentStatus @default(ACTIVE)
+  config               Json             @default("{}")  // Channel config: botToken, webhookSecret...
+  systemPromptSnapshot String           @db.Text         // Snapshot tại thời điểm deploy
+  healthStatus         HealthStatus     @default(UNKNOWN)
+  lastHealthCheck      DateTime?
+  healthDetails        Json?
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+
+  agent Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@unique([agentId, channel])
+  @@map("deployments")
 }

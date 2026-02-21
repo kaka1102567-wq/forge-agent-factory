@@ -11,6 +11,7 @@ const STATUS_VARIANT: Record<AgentStatus, "default" | "secondary" | "outline"> =
   DRAFT: "outline",
   TESTING: "secondary",
   ACTIVE: "default",
+  DEPLOYED: "default",
   DISABLED: "secondary",
 };
 
